@@ -1,0 +1,7 @@
+name: shake_head
+requires: [gesture.shake_head]
+keyframes:
+  - {t: 350,  pose: {neck_yaw: 110}}
+  - {t: 750,  pose: {neck_yaw: 70}}
+  - {t: 1100, pose: {neck_yaw: 105}}
+  - {t: 1450, pose: {neck_yaw: 90}}

@@ -1,0 +1,7 @@
+name: nod
+requires: [gesture.nod]
+keyframes:
+  - {t: 300,  pose: {neck_pitch: 75}}
+  - {t: 700,  pose: {neck_pitch: 95}}
+  - {t: 1000, pose: {neck_pitch: 78}}
+  - {t: 1300, pose: {neck_pitch: 90}}

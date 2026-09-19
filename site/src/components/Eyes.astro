@@ -1,0 +1,267 @@
+---
+/**
+ * Live ASIMOOV eyes, self-contained.
+ *
+ * Drives itself (cursor gaze, blinks, emotion cycle) until something calls
+ * `applyFaceState()` on the canvas element, after which it renders only what
+ * it is given. The state object uses the frozen `face_state.v1` field names
+ * (emotion, intensity, gaze{x,y}, lip, blink, eyelids, talking, ts) so the
+ * renderer can be swapped for `src/asimoov/faces/web/face.js` without
+ * touching the page.
+ *
+ * gaze.x > 0 = the face looks toward the viewer's right on screen.
+ */
+interface Props {
+  label?: string;
+}
+const { label = 'The ASIMOOV eyes, following your cursor' } = Astro.props;
+---
+
+<div class="eyes">
+  <canvas class="eyes__canvas" role="img" aria-label={label}></canvas>
+</div>
+
+<style>
+  .eyes {
+    width: min(100%, 34rem);
+    aspect-ratio: 5 / 2;
+    margin-inline: auto;
+  }
+
+  .eyes__canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<script>
+  /**
+   * open/wide scale the silhouette, round is the corner radius as a fraction
+   * of the short side, tilt rotates the upper lid (positive = inner corner
+   * down), drop closes it flat from the top, smile bites an arc out of the
+   * bottom, asym opens one eye more than the other.
+   */
+  const EMOTIONS = {
+    neutral: { open: 1, wide: 1, round: 0.44, tilt: 0, drop: 0, smile: 0, asym: 0 },
+    happy: { open: 0.86, wide: 1.06, round: 0.48, tilt: 0, drop: 0, smile: 0.52, asym: 0 },
+    excited: { open: 1.16, wide: 1.06, round: 0.5, tilt: 0, drop: 0, smile: 0.12, asym: 0 },
+    curious: { open: 1.02, wide: 1, round: 0.46, tilt: -0.2, drop: 0, smile: 0, asym: 0.14 },
+    annoyed: { open: 0.86, wide: 1, round: 0.42, tilt: 0.16, drop: 0.3, smile: 0, asym: 0 },
+    sad: { open: 0.9, wide: 0.98, round: 0.46, tilt: -0.34, drop: 0.06, smile: 0.1, asym: 0 },
+    angry: { open: 0.88, wide: 1, round: 0.38, tilt: 0.36, drop: 0.04, smile: 0, asym: 0 },
+    love: { open: 0.9, wide: 1.14, round: 0.5, tilt: 0, drop: 0, smile: 0.44, asym: 0 },
+    sleeping: { open: 0.13, wide: 0.98, round: 0.5, tilt: 0, drop: 0, smile: 0, asym: 0 },
+  };
+
+  const IDLE_CYCLE = ['neutral', 'curious', 'happy', 'neutral', 'excited', 'happy', 'love'];
+
+  const INK = '#1f1b16';
+  const GLOW = '#c86b12';
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
+
+  function blend(target, current, t) {
+    const out = {};
+    for (const k of Object.keys(target)) out[k] = lerp(current[k] ?? target[k], target[k], t);
+    return out;
+  }
+
+  function startEyes(canvas) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const state = {
+      emotion: 'neutral',
+      intensity: 1,
+      gaze: { x: 0, y: 0 },
+      lip: 0,
+      blink: false,
+      eyelids: 0,
+      talking: false,
+      ts: 0,
+    };
+
+    let shape = { ...EMOTIONS.neutral };
+    let gaze = { x: 0, y: 0 };
+    let blinkStart = -1;
+    let external = false;
+    let nextBlink = 1200 + Math.random() * 2600;
+    let nextEmotion = 5000;
+    let cycleIndex = 0;
+    let pointer = null;
+    let width = 0;
+    let height = 0;
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    /** Solid eye silhouette; the emotion lids are erased out of it, never past it. */
+    function drawEye(cx, cy, w, h, s, inner) {
+      const path = new Path2D();
+      path.roundRect(cx - w / 2, cy - h / 2, w, h, Math.min(w, h) * s.round);
+
+      ctx.fillStyle = INK;
+      ctx.fill(path);
+
+      ctx.save();
+      ctx.clip(path);
+      ctx.globalCompositeOperation = 'destination-out';
+
+      if (Math.abs(s.tilt) > 0.005 || s.drop > 0.005) {
+        ctx.save();
+        ctx.translate(cx, cy - h / 2);
+        ctx.rotate(s.tilt * inner);
+        ctx.beginPath();
+        ctx.rect(-w, -h * 2, w * 2, h * 2 + h * s.drop);
+        ctx.fill();
+        ctx.restore();
+      }
+      if (s.smile > 0.005) {
+        const bite = h * s.smile;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + h / 2 + bite * 0.55, w * 0.72, bite, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function render(now) {
+      ctx.clearRect(0, 0, width, height);
+      if (!width) return;
+
+      const eyeH = Math.min(height * 0.56, width * 0.22);
+      const eyeW = eyeH * 0.76 * shape.wide;
+      const gap = eyeW * 0.92;
+
+      let open = shape.open * (1 - state.eyelids * 0.85);
+      if (blinkStart >= 0) {
+        const p = (now - blinkStart) / 150;
+        if (p >= 1) blinkStart = -1;
+        else open *= 1 - Math.sin(clamp(p, 0, 1) * Math.PI) * 0.93;
+      }
+      if (state.talking) open *= 1 + state.lip * 0.05;
+
+      const h = Math.max(eyeH * open, eyeH * 0.06);
+      const cx = width / 2 + gaze.x * eyeW * 0.3;
+      const cy = height / 2 + gaze.y * eyeH * 0.16 + state.lip * eyeH * 0.03;
+
+      const radius = eyeH * 1.9;
+      const glow = ctx.createRadialGradient(cx, cy, eyeH * 0.4, cx, cy, radius);
+      glow.addColorStop(0, `${GLOW}26`);
+      glow.addColorStop(1, `${GLOW}00`);
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, radius, radius, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const hl = h * (1 - shape.asym * 0.5);
+      const hr = h * (1 + shape.asym * 0.5);
+      drawEye(cx - gap, cy, eyeW, hl, shape, 1);
+      drawEye(cx + gap, cy, eyeW, hr, shape, -1);
+
+      if (h > eyeH * 0.4) {
+        ctx.fillStyle = 'rgba(255, 249, 238, 0.9)';
+        for (const [s, eh] of [
+          [-1, hl],
+          [1, hr],
+        ]) {
+          ctx.beginPath();
+          ctx.ellipse(cx + s * gap - eyeW * 0.2, cy - eh * 0.26, eyeW * 0.09, eyeW * 0.09, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function autopilot(now, dt) {
+      const box = pointer ? canvas.getBoundingClientRect() : null;
+      const target = box
+        ? {
+            x: clamp((pointer.x - (box.left + width / 2)) / (width * 1.1), -1, 1),
+            y: clamp((pointer.y - (box.top + height / 2)) / (height * 2.5), -1, 1),
+          }
+        : { x: Math.sin(now / 3700) * 0.35, y: Math.sin(now / 5200) * 0.25 };
+      state.gaze.x = lerp(state.gaze.x, target.x, 0.06);
+      state.gaze.y = lerp(state.gaze.y, target.y, 0.06);
+
+      nextBlink -= dt;
+      if (nextBlink <= 0) {
+        state.blink = true;
+        nextBlink = 2200 + Math.random() * 4200;
+      }
+
+      nextEmotion -= dt;
+      if (nextEmotion <= 0) {
+        cycleIndex = (cycleIndex + 1) % IDLE_CYCLE.length;
+        state.emotion = IDLE_CYCLE[cycleIndex];
+        nextEmotion = 5200 + Math.random() * 3800;
+      }
+    }
+
+    let last = performance.now();
+    function frame(now) {
+      const dt = Math.min(now - last, 100);
+      last = now;
+      if (!external) autopilot(now, dt);
+      consume(now);
+      shape = blend(EMOTIONS[state.emotion] ?? EMOTIONS.neutral, shape, 0.09);
+      gaze.x = lerp(gaze.x, state.gaze.x, 0.18);
+      gaze.y = lerp(gaze.y, state.gaze.y, 0.18);
+      render(now);
+      requestAnimationFrame(frame);
+    }
+
+    function consume(now) {
+      if (state.blink) {
+        state.blink = false;
+        if (blinkStart < 0) blinkStart = now;
+      }
+    }
+
+    /** Entry point for `faces/web/face.js`: pass a face_state.v1 object. */
+    canvas.applyFaceState = (next) => {
+      external = true;
+      if (next.emotion && EMOTIONS[next.emotion]) state.emotion = next.emotion;
+      if (typeof next.intensity === 'number') state.intensity = clamp(next.intensity, 0, 1);
+      if (next.gaze) {
+        state.gaze.x = clamp(next.gaze.x ?? 0, -1, 1);
+        state.gaze.y = clamp(next.gaze.y ?? 0, -1, 1);
+      }
+      if (typeof next.lip === 'number') state.lip = clamp(next.lip, 0, 1);
+      if (typeof next.eyelids === 'number') state.eyelids = clamp(next.eyelids, 0, 1);
+      if (typeof next.talking === 'boolean') state.talking = next.talking;
+      if (next.blink) state.blink = true;
+      state.ts = next.ts ?? Date.now() / 1000;
+    };
+
+    const onPointer = (e) => {
+      pointer = { x: e.clientX, y: e.clientY };
+    };
+
+    resize();
+    new ResizeObserver(resize).observe(canvas);
+
+    if (reduced) {
+      shape = { ...EMOTIONS.neutral };
+      render(performance.now());
+      return;
+    }
+
+    window.addEventListener('pointermove', onPointer, { passive: true });
+    window.addEventListener('pointerleave', () => (pointer = null), { passive: true });
+    requestAnimationFrame(frame);
+  }
+
+  for (const canvas of document.querySelectorAll('.eyes__canvas')) startEyes(canvas);
+</script>

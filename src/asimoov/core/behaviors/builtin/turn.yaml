@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: turn
+version: 1
+description: "Turn in place by an angle."
+params: {"type": "object", "properties": {"direction": {"type": "string", "enum": ["left", "right"]}, "angle": {"type": "number", "description": "degrees"}}, "required": ["direction"]}
+requires: ["locomotion.turn"]
+duration_class: long
+interruptible: true
+fallback: move
+llm_visible: true

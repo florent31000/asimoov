@@ -1,0 +1,170 @@
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/inter';
+@import './theme.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-variation-settings: 'SOFT' 20, 'WONK' 1;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.6em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+}
+
+h2 {
+  font-size: clamp(1.9rem, 4vw, 2.7rem);
+}
+
+h3 {
+  font-size: 1.2rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+p {
+  margin: 0 0 1.1em;
+  max-width: var(--measure);
+}
+
+a {
+  color: var(--amber-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.wrap {
+  width: min(100% - 2.5rem, var(--page));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: var(--air);
+  border-top: 1px solid var(--rule);
+}
+
+.eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 1.4rem;
+}
+
+.lede {
+  font-size: 1.2rem;
+  color: var(--ink-soft);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 0.6rem 1rem;
+  z-index: 10;
+}
+
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  color: var(--cream);
+}
+
+.button {
+  display: inline-block;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid var(--ink);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.button--solid {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.button--solid:hover {
+  background: var(--amber-ink);
+  border-color: var(--amber-ink);
+  color: var(--cream);
+}
+
+.button--ghost {
+  background: transparent;
+  color: var(--ink);
+}
+
+.button--ghost:hover {
+  background: var(--amber-wash);
+  color: var(--ink);
+}
+
+pre {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 1.1rem 1.3rem;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin: 0 0 1.2rem;
+}
+
+pre code {
+  font-size: inherit;
+}

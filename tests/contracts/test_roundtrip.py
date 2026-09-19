@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from asimoov.contracts.app_manifest import (
     AppDegraded,
     AppManifest,
@@ -49,6 +51,60 @@ def test_person_seen_roundtrip() -> None:
         name="Sam",
     )
     assert PersonSeen.from_dict(original.to_dict()) == original
+
+
+def test_person_seen_identity_status_defaults_to_the_v1_1_meaning() -> None:
+    identified = PersonSeen(
+        track_id="t1",
+        confidence=0.9,
+        bearing=Bearing(az=1.0),
+        distance_class="near",
+        bbox_norm=(0.1, 0.2, 0.3, 0.4),
+        face_quality=0.7,
+        person_id="p1",
+        name="Sam",
+    )
+    anonymous = PersonSeen(
+        track_id="t2",
+        confidence=0.4,
+        bearing=Bearing(az=1.0),
+        distance_class="far",
+        bbox_norm=(0.1, 0.2, 0.3, 0.4),
+        face_quality=0.2,
+    )
+    assert identified.identity_status == "identified"
+    assert anonymous.identity_status == "unknown"
+
+
+def test_person_seen_uncertain_candidate_roundtrips() -> None:
+    original = PersonSeen(
+        track_id="t3",
+        confidence=0.52,
+        bearing=Bearing(az=8.0),
+        distance_class="medium",
+        bbox_norm=(0.4, 0.2, 0.6, 0.6),
+        face_quality=0.44,
+        identity_status="uncertain",
+        candidate_person_id="person:sam",
+        candidate_name="Sam",
+    )
+    payload = original.to_dict()
+    assert payload["person_id"] is None
+    assert payload["candidate_name"] == "Sam"
+    assert PersonSeen.from_dict(payload) == original
+
+
+def test_person_seen_rejects_an_unknown_identity_status() -> None:
+    with pytest.raises(ValueError, match="identity_status"):
+        PersonSeen(
+            track_id="t4",
+            confidence=0.5,
+            bearing=Bearing(az=0.0),
+            distance_class="near",
+            bbox_norm=(0.1, 0.2, 0.3, 0.4),
+            face_quality=0.5,
+            identity_status="maybe",
+        )
 
 
 def test_person_lost_roundtrip() -> None:

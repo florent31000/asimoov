@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: shake_hand
+version: 1
+description: "Shake hands with the person in front (or the named person)."
+params: {"type": "object", "properties": {"person": {"type": "string", "description": "name or 'current'"}}}
+requires: ["gesture.hand_right"]
+duration_class: long
+interruptible: true
+fallback: wave_hello
+llm_visible: true

@@ -1,0 +1,110 @@
+---
+import '../styles/site.css';
+
+interface Props {
+  lang: 'en' | 'fr';
+  title: string;
+  description: string;
+}
+const { lang, title, description } = Astro.props;
+
+const docsBase = lang === 'fr' ? '/fr/docs' : '/docs';
+const t =
+  lang === 'fr'
+    ? { skip: 'Aller au contenu', docs: 'Documentation', other: 'English', otherHref: '/', license: 'Apache 2.0' }
+    : { skip: 'Skip to content', docs: 'Documentation', other: 'Français', otherHref: '/fr/', license: 'Apache 2.0' };
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="alternate" hreflang="en" href={new URL('/', Astro.site)} />
+    <link rel="alternate" hreflang="fr" href={new URL('/fr/', Astro.site)} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#fbf7f0" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t.skip}</a>
+
+    <header class="topbar">
+      <div class="wrap topbar__inner">
+        <span class="topbar__mark">ASIMOOV</span>
+        <nav aria-label={t.docs}>
+          <a href={`${docsBase}/getting-started`}>{t.docs}</a>
+          <a href="https://github.com/florent31000/asimoov">GitHub</a>
+          <a href={t.otherHref} lang={lang === 'fr' ? 'en' : 'fr'}>{t.other}</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer__inner">
+        <span>ASIMOOV — {t.license}</span>
+        <nav aria-label="Footer">
+          <a href="https://github.com/florent31000/asimoov">GitHub</a>
+          <a href={`${docsBase}/privacy`}>Privacy</a>
+          <a href={`${docsBase}/getting-started`}>{t.docs}</a>
+        </nav>
+      </div>
+    </footer>
+
+    <style>
+      .topbar {
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .topbar__inner,
+      .footer__inner {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem 1.6rem;
+        align-items: center;
+        justify-content: space-between;
+        padding-block: 1.1rem;
+      }
+
+      .topbar__mark {
+        font-family: var(--font-serif);
+        font-size: 1.15rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+      }
+
+      nav {
+        display: flex;
+        gap: 1.4rem;
+        font-size: 0.93rem;
+      }
+
+      nav a {
+        color: var(--ink-soft);
+        text-decoration: none;
+      }
+
+      nav a:hover {
+        color: var(--amber-ink);
+        text-decoration: underline;
+      }
+
+      .footer {
+        border-top: 1px solid var(--rule);
+        margin-top: var(--air);
+        color: var(--ink-faint);
+        font-size: 0.9rem;
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/inter';
+
+:root {
+  --sl-font: var(--font-sans);
+  --sl-font-mono: var(--font-mono);
+  --sl-nav-height: 3.75rem;
+}
+
+/* Light: the warm cream of the landing page. */
+:root[data-theme='light'] {
+  --sl-color-accent-low: #f6ead8;
+  --sl-color-accent: #c86b12;
+  --sl-color-accent-high: #9a4f08;
+  --sl-color-white: #1f1b16;
+  --sl-color-gray-1: #2b251e;
+  --sl-color-gray-2: #453d33;
+  --sl-color-gray-3: #5d5346;
+  --sl-color-gray-4: #776c5d;
+  --sl-color-gray-5: #cfc4b1;
+  --sl-color-gray-6: #ece3d3;
+  --sl-color-gray-7: #f5efe4;
+  --sl-color-black: #fbf7f0;
+  --sl-color-bg: #fbf7f0;
+  --sl-color-bg-nav: #fffdf9;
+  --sl-color-bg-sidebar: #fbf7f0;
+  --sl-color-bg-inline-code: #f2e9da;
+  --sl-color-hairline: #e6ddcd;
+  --sl-color-hairline-light: #e6ddcd;
+  --sl-color-hairline-shade: #e6ddcd;
+  --sl-color-text-accent: #9a4f08;
+}
+
+/* Dark: the same warmth, inverted. */
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #3a2611;
+  --sl-color-accent: #c1701d;
+  --sl-color-accent-high: #edb473;
+  --sl-color-white: #f7f1e6;
+  --sl-color-gray-1: #efe7db;
+  --sl-color-gray-2: #d6cdbe;
+  --sl-color-gray-3: #a89d8c;
+  --sl-color-gray-4: #7a705f;
+  --sl-color-gray-5: #4a4237;
+  --sl-color-gray-6: #2d2721;
+  --sl-color-gray-7: #241f19;
+  --sl-color-black: #1b1712;
+  --sl-color-bg: #1b1712;
+  --sl-color-bg-nav: #221d17;
+  --sl-color-bg-sidebar: #1b1712;
+  --sl-color-bg-inline-code: #2d2721;
+  --sl-color-hairline: #332c24;
+  --sl-color-hairline-light: #332c24;
+  --sl-color-hairline-shade: #332c24;
+  --sl-color-text-accent: #edb473;
+}
+
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.content-panel h1 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-variation-settings: 'SOFT' 20, 'WONK' 1;
+  letter-spacing: -0.015em;
+}
+
+.sl-markdown-content {
+  --sl-content-width: 46rem;
+}
+
+.sl-markdown-content table {
+  font-size: 0.95rem;
+}

@@ -1,0 +1,13 @@
+apiVersion: asimoov/v1
+kind: Body
+name: avatar
+kind_of_body: virtual
+capabilities: [face.screen, face.eyelids, audio.in, audio.out, gesture.nod, gesture.shake_head]
+implements:
+  nod:        {primitive: face_anim, arg: nod, est_ms: 900}
+  shake_head: {primitive: face_anim, arg: shake_head, est_ms: 900}
+  express:    {primitive: face_anim, arg: express, est_ms: 300}
+  look_at:    {primitive: gaze}
+limits: {max_gaze_az_deg: 45, max_gaze_el_deg: 30}
+safety: {watchdog_ms: 1000, stop_on_disconnect: true, forbidden: []}
+sensors: []

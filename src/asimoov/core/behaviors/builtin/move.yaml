@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: move
+version: 1
+description: "Move in a direction for a short while."
+params: {"type": "object", "properties": {"direction": {"type": "string", "enum": ["forward", "backward", "left", "right"]}, "speed": {"type": "number", "description": "0 to 1"}, "duration": {"type": "number", "description": "seconds"}}, "required": ["direction"]}
+requires: ["locomotion.planar"]
+duration_class: long
+interruptible: true
+fallback: null
+llm_visible: true

@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: shake_hand
+version: 1
+description: "Tendre la main droite et la serrer."
+params: { type: object, properties: {} }
+requires: [gesture.hand_right]
+duration_class: long
+interruptible: true
+fallback: wave_hello
+llm_visible: true

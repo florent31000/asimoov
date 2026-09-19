@@ -1,0 +1,16 @@
+---
+const base = Astro.currentLocale === 'fr' ? '/fr/' : '/';
+---
+
+<a class="site-title" href={base}>ASIMOOV</a>
+
+<style>
+  .site-title {
+    font-family: var(--font-serif, Georgia, serif);
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--sl-color-white);
+    text-decoration: none;
+  }
+</style>

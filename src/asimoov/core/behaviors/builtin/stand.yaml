@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: stand
+version: 1
+description: "Stand up."
+params: {"type": "object", "properties": {}}
+requires: ["gesture.stand"]
+duration_class: long
+interruptible: true
+fallback: null
+llm_visible: true

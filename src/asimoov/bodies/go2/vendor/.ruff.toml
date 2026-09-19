@@ -1,0 +1,7 @@
+# Vendored third-party code (see README.md): kept as close to upstream as
+# possible, so it is not linted. The ASIMOOV patches are checked by
+# tests/bodies/go2/test_vendor.py instead.
+line-length = 300
+
+[lint]
+select = []

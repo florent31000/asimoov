@@ -1,0 +1,5 @@
+name: finger_demo
+requires: [gesture.finger_demo]
+keyframes:
+  - {t: 600,  pose: {finger_demo: 90}}
+  - {t: 1200, pose: {finger_demo: 2}}

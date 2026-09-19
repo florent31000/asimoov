@@ -1,0 +1,12 @@
+# InMoov finger bench (French persona): Sam is seen, greeted in French, and
+# asks for the one-finger demo. Run against the real InMoov adapter over the
+# fake firmware (tests/integration) -- no servo is ever touched.
+{"v":1,"kind":"percept","topic":"percept.person_seen","id":"01J9INMV000000000000000001","ts":1758290400.0,"src":"perception.face_id","corr":null,"data":{"type":"person_seen","track_id":"i1","confidence":0.88,"bearing":{"az":-10.0,"el":2.0},"distance_class":"near","bbox_norm":[0.35,0.28,0.22,0.38],"face_quality":0.76,"person_id":null,"name":null,"identity_status":"unknown"}}
+{"assert":"expect","topic":"scene.state","contains":"i1","within_s":6}
+{"assert":"expect","topic":"mind.injection","contains":"vient d'arriver","within_s":6}
+{"v":1,"kind":"reply","topic":"voice.event","id":"01J9INMV000000000000000002","ts":1758290404.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"response_done","response_id":"resp_inmoov_1"}}
+{"v":1,"kind":"percept","topic":"percept.utterance","id":"01J9INMV000000000000000003","ts":1758290405.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"utterance","text":"Montre-moi le doigt.","lang":"fr","final":true,"speaker_track_id":"i1"}}
+{"v":1,"kind":"cmd","topic":"voice.event","id":"01J9INMV000000000000000004","ts":1758290406.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"tool_call","name":"gesture","params":{"name":"finger_demo"},"call_id":"call_finger_1"}}
+{"assert":"expect","topic":"voice.event","contains":"\"type\":\"tool_result\"","within_s":6}
+{"v":1,"kind":"percept","topic":"percept.touched","id":"01J9INMV000000000000000005","ts":1758290412.0,"src":"faces.web","corr":null,"data":{"type":"touched","where":"head","intensity":0.8}}
+{"assert":"expect","topic":"face.state","contains":"gaze","within_s":6}

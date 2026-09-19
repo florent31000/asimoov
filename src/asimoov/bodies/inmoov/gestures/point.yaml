@@ -1,0 +1,6 @@
+name: point
+requires: [gesture.point]
+keyframes:
+  - {t: 600,  pose: {shoulder_r: 70, elbow_r: 30, wrist_r: 90, fingers_r: 90}}
+  - {t: 1000, pose: {fingers_r: 15}}
+  - {t: 1800, pose: {shoulder_r: 20, elbow_r: 90, fingers_r: 10}}

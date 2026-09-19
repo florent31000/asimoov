@@ -1,0 +1,23 @@
+apiVersion: asimoov/v1
+kind: Body
+name: go2
+kind_of_body: quadruped
+capabilities: [locomotion.planar, locomotion.turn, gesture.wave, gesture.sit, gesture.lie_down,
+               gesture.stand, gesture.stretch, gesture.dance, gesture.heart, gaze.body_yaw,
+               camera.front, battery]
+implements:
+  wave_hello: { primitive: sport, arg: Hello, est_ms: 4000 }
+  greet:      { primitive: sport, arg: Hello, est_ms: 4000 }
+  sit:        { primitive: sport, arg: Sit, est_ms: 2500 }
+  stand_up:   { primitive: sport, arg: StandUp, est_ms: 3000 }
+  lie_down:   { primitive: sport, arg: StandDown, est_ms: 3000 }
+  stretch:    { primitive: sport, arg: Stretch, est_ms: 4000 }
+  dance:      { primitive: sport, arg: Dance1, est_ms: 9000 }
+  heart:      { primitive: sport, arg: FingerHeart, est_ms: 4000 }
+  look_at:    { primitive: gaze_yaw }
+limits: { max_speed: 0.6, max_yaw_rate: 0.5, max_continuous_motion_s: 20 }
+safety:
+  watchdog_ms: 500
+  stop_on_disconnect: true
+  forbidden: [FrontFlip, BackFlip, LeftFlip, RightFlip, Handstand, FrontJump, FrontPounce]
+sensors: [battery, body_state, camera.front]

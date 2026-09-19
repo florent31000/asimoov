@@ -41,6 +41,8 @@ go2 = [
     "pyopenssl",
     "ifaddr",
     "dnspython",
+    "requests",
+    "packaging",
 ]
 inmoov = [
     "pyserial>=3.5",
@@ -56,11 +58,18 @@ kivy = [
     "kivy>=2.3",
     "pyjnius",
 ]
+# Microphone and speaker on a laptop or a Raspberry Pi; Android uses its own
+# capture/playback and never installs this.
+desktop = [
+    "sounddevice>=0.4.6",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
+    "pytest-cov>=5.0",
     "ruff>=0.6",
     "jsonschema>=4.20",
+    "sounddevice>=0.4.6",
 ]
 
 [project.scripts]
@@ -68,12 +77,20 @@ asimoov = "asimoov.__main__:main"
 
 [project.entry-points."asimoov.bodies"]
 fake = "asimoov.bodies.fake:FakeBody"
+avatar = "asimoov.bodies.avatar:AvatarBody"
+go2 = "asimoov.bodies.go2:Go2Body"
+inmoov = "asimoov.bodies.inmoov:InMoovBody"
 
 [project.entry-points."asimoov.faces"]
+web = "asimoov.faces.server:WebFace"
+kivy = "asimoov.faces.kivy.renderer:KivyFace"
 
 [project.entry-points."asimoov.voice_providers"]
+openai_realtime = "asimoov.voice:OpenAIRealtimeProvider"
 
 [project.entry-points."asimoov.perception"]
+face_id = "asimoov.perception.face_id:FaceIdModule"
+vad = "asimoov.perception.vad_module:VadModule"
 
 [project.entry-points."asimoov.apps"]
 
@@ -82,6 +99,12 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "asimoov.contracts" = ["schemas/*.json", "examples/*.json", "examples/*.yaml"]
+"asimoov.core" = ["behaviors/builtin/*.yaml", "memory/schema.sql"]
+"asimoov.bodies.fake" = ["manifest.yaml"]
+"asimoov.bodies.avatar" = ["manifest.yaml"]
+"asimoov.bodies.go2" = ["manifest.yaml", "vendor/unitree_webrtc_connect/LICENSE"]
+"asimoov.bodies.inmoov" = ["gestures/*.yaml"]
+"asimoov.faces.web" = ["*.html", "*.css", "*.js", "*.json"]
 
 [tool.ruff]
 line-length = 100
@@ -98,3 +121,4 @@ known-first-party = ["asimoov"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+addopts = "--import-mode=importlib"

@@ -1,0 +1,19 @@
+:root {
+  --cream: #fbf7f0;
+  --paper: #fffdf9;
+  --ink: #1f1b16;
+  --ink-soft: #5d5346;
+  --ink-faint: #776c5d;
+  --rule: #e6ddcd;
+  --amber: #c86b12;
+  --amber-ink: #9a4f08;
+  --amber-wash: #f6ead8;
+
+  --font-serif: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, monospace;
+
+  --measure: 34rem;
+  --page: 68rem;
+  --air: clamp(4.5rem, 10vw, 9rem);
+}

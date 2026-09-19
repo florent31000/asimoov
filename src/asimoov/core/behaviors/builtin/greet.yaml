@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: greet
+version: 1
+description: "Greet the person in front, or the named person."
+params: {"type": "object", "properties": {"person": {"type": "string", "description": "name or 'current'"}}}
+requires: []
+duration_class: short
+interruptible: true
+fallback: null
+llm_visible: true

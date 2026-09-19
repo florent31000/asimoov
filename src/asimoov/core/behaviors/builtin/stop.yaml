@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: stop
+version: 1
+description: "Stop every motion immediately."
+params: {"type": "object", "properties": {}}
+requires: []
+duration_class: instant
+interruptible: false
+fallback: null
+llm_visible: true

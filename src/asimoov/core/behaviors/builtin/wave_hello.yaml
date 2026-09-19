@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: wave_hello
+version: 1
+description: "Wave hello with a hand or with the whole body."
+params: {"type": "object", "properties": {}}
+requires: ["gesture.wave"]
+duration_class: long
+interruptible: true
+fallback: greet
+llm_visible: true

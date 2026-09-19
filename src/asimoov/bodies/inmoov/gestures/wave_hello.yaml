@@ -1,0 +1,9 @@
+name: wave_hello
+requires: [gesture.wave]
+keyframes:
+  - {t: 0,    pose: {shoulder_r: 90, elbow_r: 60, wrist_r: 90, fingers_r: 10}}
+  - {t: 700,  pose: {wrist_r: 130}}
+  - {t: 1100, pose: {wrist_r: 50}}
+  - {t: 1500, pose: {wrist_r: 130}}
+  - {t: 1900, pose: {wrist_r: 90}}
+  - {t: 2600, pose: {shoulder_r: 20, elbow_r: 90}}

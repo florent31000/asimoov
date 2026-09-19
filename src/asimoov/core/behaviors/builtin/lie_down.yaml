@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: lie_down
+version: 1
+description: "Lie down."
+params: {"type": "object", "properties": {}}
+requires: ["gesture.lie_down"]
+duration_class: long
+interruptible: true
+fallback: sit
+llm_visible: true

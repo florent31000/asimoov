@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: nod
+version: 1
+description: "Nod to acknowledge what was just said."
+params: {"type": "object", "properties": {}}
+requires: ["gesture.nod"]
+duration_class: short
+interruptible: true
+fallback: null
+llm_visible: true

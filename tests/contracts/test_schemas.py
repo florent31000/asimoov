@@ -14,7 +14,10 @@ EXAMPLES_DIR = Path(__file__).parents[2] / "src" / "asimoov" / "contracts" / "ex
 
 SCHEMA_TO_EXAMPLES = {
     "envelope.v1.json": ["envelope.person_seen.json"],
-    "percept.v1.json": ["percept.person_seen.json"],
+    "percept.v1.json": [
+        "percept.person_seen.json",
+        "percept.person_seen.uncertain.json",
+    ],
     "behavior.v1.json": ["behavior.shake_hand.yaml"],
     "body.v1.json": ["body.go2.yaml"],
     "persona.v1.json": ["persona.neon.yaml"],

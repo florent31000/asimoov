@@ -1,0 +1,13 @@
+# Go2 (French persona): Sam appears, the dog greets him in French, is asked to
+# sit, and reports its battery. Run against the real Go2 adapter over a fake
+# WebRTC link (tests/integration) -- no robot is ever touched.
+{"v":1,"kind":"percept","topic":"percept.person_seen","id":"01J9GO2W000000000000000001","ts":1758290400.0,"src":"perception.face_id","corr":null,"data":{"type":"person_seen","track_id":"g1","confidence":0.90,"bearing":{"az":20.0,"el":0.0},"distance_class":"near","bbox_norm":[0.40,0.30,0.20,0.35],"face_quality":0.80,"person_id":null,"name":null,"identity_status":"unknown"}}
+{"assert":"expect","topic":"scene.state","contains":"g1","within_s":6}
+{"assert":"expect","topic":"mind.injection","contains":"vient d'arriver","within_s":6}
+{"assert":"expect","topic":"voice.event","contains":"Salue","within_s":6}
+{"v":1,"kind":"reply","topic":"voice.event","id":"01J9GO2W000000000000000002","ts":1758290404.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"response_done","response_id":"resp_go2_1"}}
+{"v":1,"kind":"cmd","topic":"voice.event","id":"01J9GO2W000000000000000003","ts":1758290406.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"tool_call","name":"gesture","params":{"name":"sit"},"call_id":"call_go2_sit"}}
+{"assert":"expect","topic":"voice.event","contains":"\"type\":\"tool_result\"","within_s":6}
+{"v":1,"kind":"percept","topic":"percept.battery","id":"01J9GO2W000000000000000004","ts":1758290410.0,"src":"bodies.go2","corr":null,"data":{"type":"battery","level":0.34,"charging":false}}
+{"v":1,"kind":"percept","topic":"percept.body_state","id":"01J9GO2W000000000000000005","ts":1758290411.0,"src":"bodies.go2","corr":null,"data":{"type":"body_state","posture":"standing","moving":true}}
+{"assert":"expect","topic":"face.state","contains":"gaze","within_s":6}

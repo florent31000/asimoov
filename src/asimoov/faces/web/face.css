@@ -1,0 +1,99 @@
+:root {
+  --bg: #0b0d10;
+  --ink: #e9e4da;
+  --line: rgba(233, 228, 218, 0.25);
+  --stop: #ff4d4d;
+}
+
+body[data-theme="light"] {
+  --bg: #fbf6ec;
+  --ink: #1f1b16;
+  --line: rgba(31, 27, 22, 0.25);
+  --stop: #a3110e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 13px/1.4 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#face {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#controls {
+  position: fixed;
+  right: env(safe-area-inset-right, 0px);
+  bottom: env(safe-area-inset-bottom, 0px);
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  opacity: 0.35;
+  transition: opacity 0.2s;
+}
+
+#controls:hover,
+#controls:focus-within {
+  opacity: 1;
+}
+
+button {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+button[aria-pressed="true"] {
+  border-color: currentColor;
+}
+
+#estop {
+  color: var(--stop);
+  border-color: var(--stop);
+  letter-spacing: 0.04em;
+}
+
+#hud {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: env(safe-area-inset-left, 0px);
+  margin: 12px;
+  padding: 10px 12px;
+  max-width: 60vw;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre;
+  opacity: 0.8;
+}
+
+#status {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  right: env(safe-area-inset-right, 0px);
+  margin: 12px;
+  opacity: 0.6;
+}
+
+#capture {
+  display: none;
+}

@@ -1,0 +1,10 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: nod
+version: 1
+description: "Hocher la tete pour approuver."
+params: { type: object, properties: {} }
+requires: [gesture.nod]
+duration_class: short
+interruptible: true
+llm_visible: true

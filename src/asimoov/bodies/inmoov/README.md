@@ -1,8 +1,9 @@
-# bodies/inmoov (WS5)
+# bodies/inmoov
 
-InMoov adapter: `link.py` (serial/TCP line protocol matching
-`firmware/inmoov-uno-r4/`), `gestures.py` (YAML keyframes), `gaze_loop.py`,
-`jaw.py`, `manifest.yaml` built dynamically from the firmware `V` response.
+`InMoovBody`: the `Body` adapter for an InMoov bust (and for the one-finger
+bench) driven by `firmware/inmoov-uno-r4`.
 
-Owned by WS5. Implements `asimoov.contracts.body.Body`. See `plan.md`
-section 4.9 and `firmware/inmoov-uno-r4/protocol.md` (owned by WS5).
+`link.py` (serial / TCP line protocol), `gestures.py` (YAML keyframes ->
+`M` commands), `gaze_loop.py`, `jaw.py`, `servo_face.py`, `adapter.py`.
+
+See `docs/bodies/inmoov.md` and `firmware/inmoov-uno-r4/protocol.md`.

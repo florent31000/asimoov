@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: look_at
+version: 1
+description: "Look toward a person, a bearing, or straight ahead."
+params: {"type": "object", "properties": {"target": {"type": "string", "description": "a person's name, a track id, or 'ahead'"}, "az": {"type": "number", "description": "bearing in degrees, positive to the robot's own left"}, "el": {"type": "number", "description": "elevation in degrees, positive up"}}}
+requires: []
+duration_class: instant
+interruptible: true
+fallback: null
+llm_visible: true

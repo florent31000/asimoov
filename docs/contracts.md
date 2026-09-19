@@ -39,12 +39,14 @@ Fixed once, everywhere, so no workstream has to guess:
 Closed, versioned vocabularies (`VOCAB_VERSION = 1`):
 
 - `ENVELOPE_KINDS`: `percept | state | cmd | reply | frame | log | metric`
-- `TOPIC_PREFIXES`: `percept. scene. face. body. voice. mind. metric. log frame. x.`
+- `TOPIC_PREFIXES`: `percept. scene. face. body. voice. mind. metric. log
+  frame. x. perception. component. safety.`
 - `PERCEPT_TYPES`: `person_seen person_lost speech_started speech_ended
   utterance touched battery body_state sound_event app_event`
 - `EMOTIONS`: `neutral happy excited curious annoyed sad angry love sleeping`
 - `DURATION_CLASSES`: `instant` (<300ms) `short` (<1.5s) `long` (async)
 - `DISTANCE_CLASSES`: `near medium far`
+- `IDENTITY_STATUSES` (v1.2): `unknown uncertain identified`
 - `BODY_KINDS`: `quadruped humanoid_bust virtual wheeled other`
 - `CAPABILITIES`: base capabilities plus `gesture.<name>` for each of
   `GESTURES` (wave, sit, lie_down, stand, stretch, dance, heart, nod,
@@ -54,10 +56,23 @@ Apps extend percepts and topics under the reserved `x.<app>.*` prefix; this
 namespace is never part of the closed vocabulary above.
 
 `vocab.TOPICS` names the built-in topics as constants (`SCENE_STATE`,
-`FACE_STATE`, `BODY_CMD`, `BODY_REPLY`, `BODY_HEALTH`, `VOICE_EVENT`,
-`MIND_INJECTION`, `LOG`), plus the `PERCEPT_PREFIX` / `METRIC_PREFIX` /
-`FRAME_PREFIX` prefixes and the `COMPONENT_HEALTH_PATTERN` naming
-convention (`<component>.health`, e.g. `body.health` today).
+`FACE_STATE`, `FACE_OVERLAY`, `BODY_CMD`, `BODY_REPLY`, `BODY_HEALTH`,
+`VOICE_EVENT`, `MIND_INJECTION`, `SAFETY_ESTOP`, `LOG`), plus the
+`PERCEPT_PREFIX` / `METRIC_PREFIX` / `FRAME_PREFIX` prefixes and the
+`COMPONENT_HEALTH_PATTERN` naming convention (`<component>.health`, e.g.
+`body.health` today).
+
+Two of those are v1.2. `safety.estop` is the request any component makes to
+cut everything (the face page's E-STOP button publishes it; the core
+subscribes and calls `SafetyGuard.stop_all`). `face.overlay` is a body's
+transient contribution to the face: the Mind alone publishes `face.state`,
+and mixes the newest overlay on top of it for a fraction of a second.
+
+`body.manifest` is v1.3: a body republishes its `BodyManifest` there, as a
+`state` envelope, every time it learns what it is. A bust reads its channel
+table from the firmware, so before its link is up it declares no capability
+at all; the core rebinds the resolver, the executor, the safety guard and
+the tool list on every such message.
 
 `vocab.APP_PERMISSIONS` (`APP_PERMISSIONS_VERSION = 1`) is the closed list
 an app's `permissions` (`app.v1.json`) draws from: `camera.frames`,
@@ -99,6 +114,17 @@ One dataclass per type in `vocab.PERCEPT_TYPES`, each with `to_dict()` /
 `from_dict()` and a `PERCEPT_TYPE` class attribute. `decode_percept(type,
 data)` dispatches through `PERCEPT_CLASSES`. See
 `examples/percept.person_seen.json`.
+
+`PersonSeen` carries the recognizer's confidence about *who* this is
+(v1.2): `identity_status` is `unknown`, `uncertain` or `identified`, and
+`person_id` is only set when it is `identified`. While it is `uncertain`,
+`candidate_person_id` / `candidate_name` say who is suspected -- something
+the mind may ask about ("are you Sam?") and must never assume -- and
+`candidate_score` (v1.3) is the similarity behind that suspicion, which is
+what lets the mind say "this looks like Sam (0.52)". A producer
+that omits `identity_status` gets the v1.1 meaning: `identified` when
+`person_id` is set, `unknown` otherwise. See
+`examples/percept.person_seen.uncertain.json`.
 
 ## Behaviors (`behaviors.py`, `schemas/behavior.v1.json`)
 
@@ -150,6 +176,18 @@ signature WS6 implements and WS1's hub calls, so the same port (7331)
 serves both the bus WebSocket and the face page. See
 `examples/face_state.curious.json`.
 
+A renderer that serves a page exposes three **optional attributes on the
+instance**, which the core reads with `getattr` and mounts on the hub
+(`Runtime._mount_face`):
+
+| attribute | type | what the hub does with it |
+|---|---|---|
+| `process_request` | `ProcessRequestHook` | answers `GET /face/...` as plain HTTP |
+| `ws_path` | `str` | the path whose WebSocket connections are routed to this renderer |
+| `attach` | `async attach(connection, *, path)` | owns that connection until it closes (its own token check, its own protocol) |
+
+A renderer with none of them (Kivy, servos, LEDs) needs no hub at all.
+
 ## Audio (`audio.py`, no schema -- PCM16 never crosses the bus as JSON)
 
 `AudioSource` / `AudioSink` capture and play PCM16: raw, headerless,
@@ -166,6 +204,39 @@ chunks), `FakeAudioSink` (records writes, exposes `tracker()`) and
 `FakePlaybackTracker` (a simulated head advanced explicitly via
 `advance_ms`, not real time, for deterministic tests).
 
+`PlaybackTracker` also has three optional push hooks (v1.2),
+`set_energy_callback(cb, loop=None)`, `set_timestamp_callback(cb,
+loop=None)` and `set_loop(loop)`, all defaulting to a no-op. A tracker
+backed by a real device knows when its head moved, so it pushes the energy
+that drives `FaceState.lip` instead of being polled at 20 Hz; `loop` is the
+event loop the device thread marshals the call onto. A caller registers the
+callbacks and keeps polling if nothing ever arrives.
+
+## Frames (`frames.py`, no schema -- binary, never JSON)
+
+The one codec for binary `frame.*` messages, shared by the face page, the
+Go2's front camera and perception's `ws_frames` source. The hub relays
+these bytes between clients untouched and the core never subscribes to them
+(plan.md section 4.3).
+
+`encode_frame(topic, jpeg, *, seq=0, ts_ms=0) -> bytes` and
+`decode_frame(message, *, default_topic=None) -> FrameMessage`
+(`topic`, `seq`, `ts_ms`, `jpeg`). Layout, big-endian:
+
+| bytes | field | meaning |
+|---|---|---|
+| 0 | `ver` | always 1 (`FRAME_VERSION`) |
+| 1 | `tlen` | length in bytes of the UTF-8 topic that follows the header |
+| 2-3 | `seq` | wrapping frame counter (uint16), for drop detection |
+| 4-7 | `ts_ms` | capture time, Unix milliseconds modulo 2**32 |
+
+then `tlen` bytes of topic (`frame.browser`, `frame.go2`, ...) and the JPEG
+payload to the end of the message. The topic is spelled out rather than
+numbered so a new camera needs no registry entry on both sides. A message
+that is a bare JPEG (starting with `FF D8 FF`) is accepted when the caller
+passes `default_topic`; anything else raises `ValueError` rather than being
+silently dropped.
+
 ## Voice (`voice.py`, no schema -- provider-internal protocol)
 
 `VoiceProvider` ABC: `start(events, config)`, `stop()`, `send_audio(pcm16)`,
@@ -174,6 +245,21 @@ chunks), `FakeAudioSink` (records writes, exposes `tracker()`) and
 without one and killing unrelated actions), `truncate_item(item_id,
 played_ms)`. `VoiceEvents`: `on_speech_started/ended`, `on_utterance`,
 `on_tool_call`, `on_audio_out`, `on_response_done`.
+
+Three optional members, each with a working default so no existing
+implementation breaks:
+
+- `VoiceProvider.send_tool_result(call_id, result)` -- returns the whole
+  `ToolResult` to the model. The default is a no-op, for a provider with no
+  function-calling channel; the core logs once that tool results are staying
+  on the bus rather than letting them vanish.
+- `VoiceEvents.on_assistant_text(text)` (v1.2) -- the assistant's own
+  transcript for a finished response, which the core journals so an episode
+  summary covers both sides of the conversation.
+- `VoiceEvents.on_response_started(response_id)` (v1.3) -- emitted for
+  every response, including the ones the model starts on its own. Without
+  it a core only knows about the responses it requested itself and injects
+  system text into the middle of the robot's speech.
 
 ## Perception (`perception.py`, no schema -- process-internal)
 
@@ -188,6 +274,16 @@ envelope, `{"ok": False, "reason": ...}` on real failure, never a hang.
 `match_face(vec)`, `add_fact`, `recall(query, k)` (text only, never
 embeddings or numeric aggregates), `start_episode` / `end_episode`,
 `journal`.
+
+Two optional methods (v1.3), not abstract, so a v1.2 store still
+instantiates: `delete_person(person_id) -> bool` forgets an identity, their
+facts, the episodes they took part in and their face embeddings in one
+transaction (the default raises `NotImplementedError`, so "forget me"
+reports a refusal rather than pretending), and `reload_gallery() -> int`
+rebuilds the in-RAM face gallery and returns its size (default `0`).
+
+One SQLite schema serves both the memory store and perception's face store:
+`core/memory/schema.sql`, WAL on.
 
 ## Persona (`persona.py`, `schemas/persona.v1.json`)
 

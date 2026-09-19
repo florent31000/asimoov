@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: sit
+version: 1
+description: "Sit down."
+params: {"type": "object", "properties": {}}
+requires: ["gesture.sit"]
+duration_class: long
+interruptible: true
+fallback: null
+llm_visible: true

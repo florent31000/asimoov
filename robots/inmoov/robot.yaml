@@ -1,0 +1,14 @@
+apiVersion: asimoov/v1
+kind: Robot
+persona: ./persona.yaml
+body:
+  type: inmoov
+  link: serial
+  port: COM5
+  limits: {}
+faces: [web]
+audio: { source: default, sink: default }
+perception: { face_id: { enabled: false } }
+behaviors_dir: ./behaviors
+apps: []
+hub: { host: 0.0.0.0, port: 7331 }

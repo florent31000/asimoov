@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Any, ClassVar
 
-from asimoov.contracts.vocab import DISTANCE_CLASSES
+from asimoov.contracts.vocab import DISTANCE_CLASSES, IDENTITY_STATUSES
 
 TOUCH_LOCATIONS: tuple[str, ...] = ("head", "back", "hand_l", "hand_r", "screen")
 
@@ -37,8 +37,24 @@ class Bearing:
 class PersonSeen:
     """A tracked person is currently visible.
 
+    Attributes:
+        person_id: Set only when ``identity_status`` is ``identified``; a
+            consumer may use it without further checks.
+        identity_status: v1.2. ``unknown``, ``uncertain`` or ``identified``
+            (``vocab.IDENTITY_STATUSES``). Defaults to ``identified`` when
+            ``person_id`` is set and ``unknown`` otherwise, so a producer
+            written against v1.1 keeps the same meaning.
+        candidate_person_id: v1.2. Who the recognizer suspects while
+            ``identity_status`` is ``uncertain``. Never an identity: the mind
+            may ask, it must not assume.
+        candidate_name: v1.2. That candidate's name, when it is known.
+        candidate_score: v1.3. The similarity behind that candidate, in
+            [0, 1]. The mind quotes it when it says "this looks like Sam
+            (0.52)"; it is never a reason to use the name as a fact.
+
     Raises:
-        ValueError: if ``distance_class`` is not in ``vocab.DISTANCE_CLASSES``.
+        ValueError: if ``distance_class`` is not in ``vocab.DISTANCE_CLASSES``
+            or ``identity_status`` is not in ``vocab.IDENTITY_STATUSES``.
     """
 
     PERCEPT_TYPE: ClassVar[str] = "person_seen"
@@ -51,10 +67,19 @@ class PersonSeen:
     face_quality: float
     person_id: str | None = None
     name: str | None = None
+    identity_status: str | None = None
+    candidate_person_id: str | None = None
+    candidate_name: str | None = None
+    candidate_score: float | None = None
 
     def __post_init__(self) -> None:
         if self.distance_class not in DISTANCE_CLASSES:
             raise ValueError(f"invalid distance_class: {self.distance_class!r}")
+        if self.identity_status is None:
+            status = "identified" if self.person_id else "unknown"
+            object.__setattr__(self, "identity_status", status)
+        elif self.identity_status not in IDENTITY_STATUSES:
+            raise ValueError(f"invalid identity_status: {self.identity_status!r}")
 
     def to_dict(self) -> dict[str, Any]:
         payload = {"type": self.PERCEPT_TYPE, **asdict(self)}
@@ -77,6 +102,10 @@ class PersonSeen:
             face_quality=payload["face_quality"],
             person_id=payload.get("person_id"),
             name=payload.get("name"),
+            identity_status=payload.get("identity_status"),
+            candidate_person_id=payload.get("candidate_person_id"),
+            candidate_name=payload.get("candidate_name"),
+            candidate_score=payload.get("candidate_score"),
         )
 
 

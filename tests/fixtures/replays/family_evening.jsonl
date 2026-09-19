@@ -1,0 +1,23 @@
+# Sam arrives, is unknown, introduces himself, is remembered, leaves, comes back
+# later and is recognized from memory. Envelope lines are envelope.v1; "assert"
+# lines are checked by asimoov.core.replay (see docs/architecture.md).
+# perception.face_id republishes person_seen for every live track a few times a
+# second; the lines below keep that rhythm coarsely (a sighting every 3 s).
+{"v":1,"kind":"percept","topic":"percept.person_seen","id":"01J9FAMILY0000000000000001","ts":1758290400.0,"src":"perception.face_id","corr":null,"data":{"type":"person_seen","track_id":"t1","confidence":0.92,"bearing":{"az":12.0,"el":0.0},"distance_class":"near","bbox_norm":[0.40,0.30,0.20,0.35],"face_quality":0.81,"person_id":null,"name":null}}
+{"assert":"expect","topic":"mind.injection","contains":"do not know","within_s":6}
+{"assert":"expect","topic":"voice.event","contains":"ask their name","within_s":6}
+{"v":1,"kind":"reply","topic":"voice.event","id":"01J9FAMILY0000000000000002","ts":1758290404.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"response_done","response_id":"resp_1"}}
+{"v":1,"kind":"percept","topic":"percept.person_seen","id":"01J9FAMILY0000000000000003","ts":1758290405.0,"src":"perception.face_id","corr":null,"data":{"type":"person_seen","track_id":"t1","confidence":0.93,"bearing":{"az":11.0,"el":0.0},"distance_class":"near","bbox_norm":[0.40,0.30,0.20,0.35],"face_quality":0.83,"person_id":null,"name":null}}
+{"v":1,"kind":"percept","topic":"percept.speech_started","id":"01J9FAMILY0000000000000004","ts":1758290406.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"speech_started","source":"voice","direction":{"az":12.0,"el":0.0}}}
+{"v":1,"kind":"percept","topic":"percept.utterance","id":"01J9FAMILY0000000000000005","ts":1758290407.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"utterance","text":"Hi, I am Sam.","lang":"en","final":true,"speaker_track_id":"t1"}}
+{"v":1,"kind":"percept","topic":"percept.speech_ended","id":"01J9FAMILY0000000000000006","ts":1758290408.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"speech_ended","source":"voice"}}
+{"v":1,"kind":"percept","topic":"percept.person_seen","id":"01J9FAMILY0000000000000007","ts":1758290408.5,"src":"perception.face_id","corr":null,"data":{"type":"person_seen","track_id":"t1","confidence":0.94,"bearing":{"az":10.0,"el":0.0},"distance_class":"near","bbox_norm":[0.40,0.30,0.20,0.35],"face_quality":0.84,"person_id":null,"name":null}}
+{"v":1,"kind":"cmd","topic":"voice.event","id":"01J9FAMILY0000000000000008","ts":1758290409.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"tool_call","name":"remember_person","params":{"name":"Sam"},"call_id":"call_sam_1"}}
+{"assert":"expect","topic":"voice.event","contains":"\"bound_to_track\":true","within_s":6}
+{"v":1,"kind":"cmd","topic":"voice.event","id":"01J9FAMILY0000000000000009","ts":1758290412.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"tool_call","name":"remember_fact","params":{"person":"Sam","fact":"Sam is building an InMoov hand with his father."},"call_id":"call_sam_2"}}
+{"assert":"expect","topic":"voice.event","contains":"\"status\":\"ok\"","within_s":6}
+{"v":1,"kind":"reply","topic":"voice.event","id":"01J9FAMILY0000000000000010","ts":1758290418.0,"src":"voice.openai_realtime","corr":null,"data":{"type":"response_done","response_id":"resp_2"}}
+{"v":1,"kind":"percept","topic":"percept.person_lost","id":"01J9FAMILY0000000000000011","ts":1758290425.0,"src":"perception.face_id","corr":null,"data":{"type":"person_lost","track_id":"t1","person_id":"person:sam","last_bearing":{"az":10.0,"el":0.0}}}
+{"v":1,"kind":"percept","topic":"percept.person_seen","id":"01J9FAMILY0000000000000012","ts":1758290700.0,"src":"perception.face_id","corr":null,"data":{"type":"person_seen","track_id":"t2","confidence":0.88,"bearing":{"az":-8.0,"el":0.0},"distance_class":"medium","bbox_norm":[0.45,0.32,0.18,0.30],"face_quality":0.77,"person_id":"person:sam","name":null}}
+{"v":1,"kind":"percept","topic":"percept.person_seen","id":"01J9FAMILY0000000000000013","ts":1758290702.0,"src":"perception.face_id","corr":null,"data":{"type":"person_seen","track_id":"t2","confidence":0.90,"bearing":{"az":-6.0,"el":0.0},"distance_class":"medium","bbox_norm":[0.45,0.32,0.18,0.30],"face_quality":0.79,"person_id":"person:sam","name":null}}
+{"assert":"expect","topic":"mind.injection","contains":"Sam just arrived","within_s":8}

@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: express
+version: 1
+description: "Show an emotion on the face."
+params: {"type": "object", "properties": {"emotion": {"type": "string"}, "intensity": {"type": "number", "description": "0 to 1"}}, "required": ["emotion"]}
+requires: []
+duration_class: instant
+interruptible: true
+fallback: null
+llm_visible: true

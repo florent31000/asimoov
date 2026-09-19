@@ -42,6 +42,11 @@ TOPIC_PREFIXES: tuple[str, ...] = (
     "log",
     "frame.",
     "x.",
+    # v1.2: commands and health of an out-of-process perception module
+    # (`perception.face_id.enroll`), and the supervisor's component health.
+    "perception.",
+    "component.",
+    "safety.",
 )
 
 # ---------------------------------------------------------------------------
@@ -97,6 +102,14 @@ DURATION_CLASS_MAX_MS: dict[str, int | None] = {
 # ---------------------------------------------------------------------------
 
 DISTANCE_CLASSES: tuple[str, ...] = ("near", "medium", "far")
+
+# ---------------------------------------------------------------------------
+# Identity statuses (percept.v1 "person_seen.identity_status", v1.2). How sure
+# face recognition is about who this track is; "uncertain" carries a candidate
+# the mind may confirm out loud ("are you Sam?") but never assumes.
+# ---------------------------------------------------------------------------
+
+IDENTITY_STATUSES: tuple[str, ...] = ("unknown", "uncertain", "identified")
 
 # ---------------------------------------------------------------------------
 # Kinds of body (body.v1 "kind_of_body").
@@ -192,6 +205,18 @@ class TOPICS:
     VOICE_EVENT = "voice.event"
     MIND_INJECTION = "mind.injection"
     LOG = "log"
+
+    # v1.2: an emergency stop asked for by any component (the face page's
+    # E-STOP button, an app). `SafetyGuard` subscribes and stops everything.
+    SAFETY_ESTOP = "safety.estop"
+    # v1.2: a body's transient contribution to the face, mixed by the Mind
+    # on top of `face.state`, which the Mind alone publishes.
+    FACE_OVERLAY = "face.overlay"
+    # v1.3: a body republishes its `BodyManifest` here (kind `state`) every
+    # time it learns what it is -- a bust reads its channel table from the
+    # firmware, so its capabilities only exist once the link is up. The core
+    # rebinds the resolver, the executor, the safety guard and the tools.
+    BODY_MANIFEST = "body.manifest"
 
     # Prefixes (see TOPIC_PREFIXES): every topic under these is a `percept`,
     # `metric` or binary `frame` respectively. `COMPONENT_HEALTH_PATTERN`

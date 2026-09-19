@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: wave_hello
+version: 1
+description: "Faire un signe de la main droite pour saluer."
+params: { type: object, properties: {} }
+requires: [gesture.wave]
+duration_class: long
+interruptible: true
+fallback: nod
+llm_visible: true

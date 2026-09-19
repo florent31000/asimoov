@@ -196,3 +196,25 @@ class MemoryStore(ABC):
     @abstractmethod
     async def journal(self, text: str, kind: str = "note") -> None:
         """Append a free-text line to the journal, timestamped now."""
+
+    async def delete_person(self, person_id: str) -> bool:
+        """Optional (v1.3). Forget a person entirely. False if unknown.
+
+        Removes the identity, their facts, the episodes they took part in
+        and their face embeddings, in one transaction. Not abstract, so a
+        v1.2 store still instantiates; the default refuses rather than
+        pretending it forgot (the ``forget_person`` tool reports the
+        refusal to the user).
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} cannot delete a person: 'forget me' is unavailable"
+        )
+
+    async def reload_gallery(self) -> int:
+        """Optional (v1.3). Rebuild the in-RAM face gallery, return its size.
+
+        Called after `delete_person` so a forgotten face stops being
+        recognized without restarting the process. Stores with no gallery
+        return 0.
+        """
+        return 0

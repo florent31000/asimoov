@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Protocol
 
 from asimoov.contracts.percepts import Utterance
+from asimoov.contracts.tools import ToolResult
 
 
 class VoiceEvents(Protocol):
@@ -48,8 +49,28 @@ class VoiceEvents(Protocol):
         `AudioSink` runs at another rate.
         """
 
+    def on_response_started(self, response_id: str) -> None:
+        """Optional (v1.3). A response started, whoever asked for it.
+
+        The model starts a response on its own after every user turn, so a
+        core that only knows about the responses it requested itself would
+        inject system text straight into the robot's speech. Providers that
+        cannot tell simply never call it; cores that do not want it may
+        leave it unimplemented, so callers must go through
+        ``getattr(events, "on_response_started", None)``.
+        """
+
     def on_response_done(self, response_id: str) -> None:
         """A response finished (naturally or via `cancel_response`)."""
+
+    def on_assistant_text(self, text: str) -> None:
+        """Optional (v1.2). The assistant's own transcript for a finished response.
+
+        Lets the core journal what the robot said without transcribing its
+        own audio. Providers that cannot produce it simply never call it;
+        cores that do not want it may leave it unimplemented, so callers
+        must go through ``getattr(events, "on_assistant_text", None)``.
+        """
 
 
 class VoiceProvider(ABC):
@@ -128,3 +149,15 @@ class VoiceProvider(ABC):
         actually heard, using `PlaybackTracker.played_ms(item_id)` as the
         source of truth for ``played_ms``.
         """
+
+    async def send_tool_result(self, call_id: str, result: ToolResult) -> None:
+        """Optional (v1.2). Return the real result of tool call ``call_id`` to the model.
+
+        The default is a no-op: a provider with no function-calling channel
+        (a plain TTS pipeline) has nowhere to put the result, and the core
+        logs once that tool results stay on the bus rather than failing.
+        Implementations send the whole `ToolResult`, never a stringified
+        ``"ok"`` (plan.md section 2, item 7), and must not start a response
+        while one is already streaming.
+        """
+        return None

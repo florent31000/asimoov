@@ -18,6 +18,7 @@ from asimoov.contracts.body import Body, BodyContext, BodyHealth, BodyManifest, 
 from asimoov.contracts.envelope import new_id
 from asimoov.contracts.face import FaceRenderer, FaceState
 from asimoov.contracts.memory import Episode, Fact, JournalEntry, MemoryStore, Person
+from asimoov.contracts.tools import ToolResult
 from asimoov.contracts.voice import VoiceEvents, VoiceProvider
 
 _DEFAULT_FAKE_BODY_MANIFEST = BodyManifest(
@@ -253,6 +254,7 @@ class FakeVoiceProvider(VoiceProvider):
         self.requested_responses: list[str | None] = []
         self.canceled_response_ids: list[str] = []
         self.truncated: list[tuple[str, float]] = []
+        self.tool_results: list[tuple[str, ToolResult]] = []
         self.started = False
 
     async def start(self, events: VoiceEvents, config: dict[str, Any]) -> None:
@@ -278,6 +280,9 @@ class FakeVoiceProvider(VoiceProvider):
 
     async def truncate_item(self, item_id: str, played_ms: float) -> None:
         self.truncated.append((item_id, played_ms))
+
+    async def send_tool_result(self, call_id: str, result: ToolResult) -> None:
+        self.tool_results.append((call_id, result))
 
     async def play_script(self) -> None:
         """Replay every scripted event onto the `VoiceEvents` given to `start`."""
@@ -371,3 +376,14 @@ class InMemoryMemoryStore(MemoryStore):
 
     async def journal(self, text: str, kind: str = "note") -> None:
         self._journal.append(JournalEntry(ts=time.time(), text=text, kind=kind))
+
+    async def delete_person(self, person_id: str) -> bool:
+        if self._persons.pop(person_id, None) is None:
+            return False
+        self._facts = [fact for fact in self._facts if fact.person_id != person_id]
+        self._episodes = {
+            episode_id: episode
+            for episode_id, episode in self._episodes.items()
+            if person_id not in episode.participants
+        }
+        return True

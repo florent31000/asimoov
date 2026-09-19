@@ -1,7 +1,6 @@
-# robots/inmoov (WS5)
+# robots/inmoov
 
-Example `robot.yaml` + `persona.yaml` + `behaviors/` for the InMoov bust
-(serial or TCP link to `firmware/inmoov-uno-r4/`).
+Example robot for an InMoov bust: `robot.yaml` (serial link by default),
+`persona.yaml` (French) and the six behaviors the adapter implements.
 
-Owned by WS5. See `plan.md` section 4.9 and the `robot.yaml` shape in
-section 4.3.
+See `docs/bodies/inmoov.md`.

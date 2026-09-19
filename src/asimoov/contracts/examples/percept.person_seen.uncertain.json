@@ -1,0 +1,15 @@
+{
+  "type": "person_seen",
+  "track_id": "t43",
+  "person_id": null,
+  "name": null,
+  "identity_status": "uncertain",
+  "candidate_person_id": "person:sam",
+  "candidate_name": "Sam",
+  "candidate_score": 0.52,
+  "confidence": 0.81,
+  "bearing": { "az": 8.0, "el": -2.0 },
+  "distance_class": "medium",
+  "bbox_norm": [0.41, 0.22, 0.58, 0.61],
+  "face_quality": 0.44
+}

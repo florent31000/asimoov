@@ -29,6 +29,7 @@ One millisecond of audio is therefore
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from asyncio import AbstractEventLoop
 from collections.abc import Callable
 
 PCM_SAMPLE_WIDTH_BYTES = 2
@@ -137,3 +138,35 @@ class PlaybackTracker(ABC):
 
         Must not raise if nothing is playing.
         """
+
+    # -- optional push hooks (v1.2) -----------------------------------------
+    #
+    # Polling `energy_at_head()` at 20 Hz from the mind costs a wake-up per
+    # frame and always lags the device by up to a period. A tracker backed by
+    # a real device already knows when its head moved, so it may push instead.
+    # All three default to a no-op: a caller registers a callback and falls
+    # back to polling if nothing ever arrives.
+
+    def set_energy_callback(
+        self,
+        callback: Callable[[float], None] | None,
+        loop: AbstractEventLoop | None = None,
+    ) -> None:
+        """Push `energy_at_head` every time the audible head moves.
+
+        ``loop``, when given, is the event loop the callback must run on;
+        the device thread marshals the call with ``call_soon_threadsafe``.
+        """
+        return None
+
+    def set_timestamp_callback(
+        self,
+        callback: Callable[[str, float], None] | None,
+        loop: AbstractEventLoop | None = None,
+    ) -> None:
+        """Push ``(name, unix_s)`` telemetry marks, e.g. ``first_audio_played_ts``."""
+        return None
+
+    def set_loop(self, loop: AbstractEventLoop | None) -> None:
+        """Set the event loop every registered callback is marshalled onto."""
+        return None

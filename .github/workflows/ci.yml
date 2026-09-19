@@ -27,3 +27,35 @@ jobs:
 
       - name: Pytest
         run: pytest tests
+
+  firmware:
+    # Compiles the InMoov sketch for the UNO R4 WiFi; never uploads, and
+    # never needs `secrets.h` (config.h ships with ASIMOOV_WIFI_ENABLED 0).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v1
+
+      - name: Install core and libraries
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:renesas_uno
+          arduino-cli lib install "Adafruit PWM Servo Driver Library"
+
+      - name: Compile (bench config)
+        run: |
+          arduino-cli compile --warnings all \
+            --fqbn arduino:renesas_uno:unor4wifi \
+            firmware/inmoov-uno-r4/asimoov_inmoov
+
+  gitleaks:
+    # No API key, token or credential may ever enter this repository's
+    # history (CLAUDE.md, plan.md section 8).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,17 @@
+apiVersion: asimoov/v1
+kind: Robot
+persona: ./persona.yaml
+body:
+  type: go2
+  config:
+    mode: sta                  # sta (robot on the house Wi-Fi) | ap | remote
+    serial_number: ""          # found by multicast when robot_ip is empty
+    robot_ip: ""               # e.g. 192.168.1.42, skips the discovery
+    obstacle_avoidance: true
+    frames: { enabled: false, fps: 5 }
+faces: [web]
+audio: { source: default, sink: default }
+perception: { face_id: { enabled: false, camera: go2 } }
+behaviors_dir: ./behaviors
+apps: []
+hub: { host: 0.0.0.0, port: 7331 }

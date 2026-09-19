@@ -1,0 +1,10 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: finger_demo
+version: 1
+description: "Plier puis tendre le doigt du banc de test."
+params: { type: object, properties: {} }
+requires: [gesture.finger_demo]
+duration_class: short
+interruptible: true
+llm_visible: true

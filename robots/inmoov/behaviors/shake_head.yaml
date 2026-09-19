@@ -1,0 +1,10 @@
+apiVersion: asimoov/v1
+kind: Behavior
+name: shake_head
+version: 1
+description: "Secouer la tete pour dire non."
+params: { type: object, properties: {} }
+requires: [gesture.shake_head]
+duration_class: short
+interruptible: true
+llm_visible: true

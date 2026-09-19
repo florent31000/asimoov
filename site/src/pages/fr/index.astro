@@ -1,0 +1,102 @@
+---
+import Eyes from '../../components/Eyes.astro';
+import Landing from '../../layouts/Landing.astro';
+
+const sections = [
+  'Ce que fait un robot avec ASIMOOV',
+  'Comment ça marche',
+  'Corps supportés',
+  'Une personnalité est un fichier',
+  'Vie privée',
+  'Démarrer',
+  'Contribuer',
+];
+---
+
+<Landing
+  lang="fr"
+  title="ASIMOOV — Donnez une âme à votre robot"
+  description="L'âme open source des robots de compagnie. Il sait qui vous êtes, se souvient de vous, et vous regarde quand vous parlez. Tourne sur votre machine. Apache 2.0."
+>
+  <section class="hero">
+    <div class="wrap hero__inner">
+      <Eyes label="Les yeux d'ASIMOOV, qui suivent votre curseur" />
+      <h1>Donnez une âme à votre robot.</h1>
+      <p class="hero__claim">Une âme. N'importe quel corps.</p>
+      <p class="lede">Il sait qui vous êtes, se souvient de vous, et vous regarde quand vous parlez.</p>
+      <p class="hero__cmd"><code>pip install asimoov</code></p>
+      <p class="hero__note">
+        La version française arrive. <a href="/">Read the English site</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <ul class="sections">
+        {sections.map((s) => <li>{s}</li>)}
+      </ul>
+    </div>
+  </section>
+</Landing>
+
+<style>
+  .hero__inner {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem) var(--air);
+    text-align: center;
+  }
+
+  .hero h1 {
+    margin-top: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .hero p {
+    margin-inline: auto;
+  }
+
+  .hero__claim {
+    font-family: var(--font-serif);
+    font-size: clamp(1.3rem, 2.6vw, 1.7rem);
+    color: var(--amber-ink);
+    margin-bottom: 1.2rem;
+  }
+
+  .hero .lede {
+    max-width: 30rem;
+  }
+
+  .hero__cmd {
+    margin-top: 2rem;
+  }
+
+  .hero__cmd code {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .hero__note {
+    margin-top: 1.6rem;
+    font-size: 0.9rem;
+    color: var(--ink-faint);
+  }
+
+  .sections {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.9rem;
+    max-width: var(--measure);
+  }
+
+  .sections li {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    color: var(--ink-faint);
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--rule);
+  }
+</style>

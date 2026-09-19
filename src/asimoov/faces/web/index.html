@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <title>ASIMOOV</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="face.css" />
+  </head>
+  <body data-theme="dark">
+    <canvas id="face"></canvas>
+
+    <div id="hud" hidden></div>
+
+    <div id="controls">
+      <button id="camera" type="button" aria-pressed="false">Camera off</button>
+      <button id="hud-toggle" type="button" aria-pressed="false">HUD</button>
+      <button id="estop" type="button">E-STOP</button>
+    </div>
+
+    <p id="status" role="status" hidden></p>
+
+    <video id="capture" playsinline muted hidden></video>
+    <script src="face.js"></script>
+  </body>
+</html>

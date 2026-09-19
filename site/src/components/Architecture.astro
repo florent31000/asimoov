@@ -1,0 +1,19 @@
+---
+import svg from '../../public/diagrams/architecture.svg?raw';
+---
+
+<figure class="diagram" set:html={svg} />
+
+<style>
+  .diagram {
+    margin: 2.5rem 0 0;
+  }
+
+  .diagram :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+  }
+</style>

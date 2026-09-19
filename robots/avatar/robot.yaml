@@ -4,7 +4,7 @@ persona: ./persona.yaml
 body: { type: avatar }
 faces: [web]
 audio: { source: default, sink: default }
-perception: { face_id: { enabled: false } }
+perception: { face_id: { enabled: true, camera: ws_frames } }
 behaviors_dir: ./behaviors
 apps: []
 hub: { host: 0.0.0.0, port: 7331 }

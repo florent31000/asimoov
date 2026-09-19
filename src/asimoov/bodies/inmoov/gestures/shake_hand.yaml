@@ -1,0 +1,8 @@
+name: shake_hand
+requires: [gesture.hand_right]
+keyframes:
+  - {t: 0,    pose: {shoulder_r: 40, elbow_r: 70, wrist_r: 90, fingers_r: 10}}
+  - {t: 900,  pose: {shoulder_r: 60, elbow_r: 40, fingers_r: 80}}
+  - {t: 1400, pose: {elbow_r: 55}}
+  - {t: 1900, pose: {elbow_r: 40}}
+  - {t: 2800, pose: {shoulder_r: 20, elbow_r: 90, fingers_r: 10}}

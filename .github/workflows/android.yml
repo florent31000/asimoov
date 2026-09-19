@@ -1,0 +1,66 @@
+name: Android
+
+# Manual only: a cold APK build is about an hour and nothing in the repo
+# depends on it. Run it before a release or after touching android/.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Build mode
+        type: choice
+        options: [debug, release]
+        default: debug
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check the aiortc patches still apply
+        run: python3 android/hooks/check_patches.py
+
+      - name: Cache the buildozer and gradle state
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            ~/.gradle
+          key: buildozer-${{ runner.os }}-${{ hashFiles('android/buildozer.spec', 'android/Dockerfile') }}
+          restore-keys: buildozer-${{ runner.os }}-
+
+      - name: Build the toolchain image
+        run: docker build -t asimoov-android android/
+
+      - name: Build the APK
+        run: |
+          docker run --rm \
+            -v "$PWD":/work \
+            -v "$HOME/.buildozer":/home/builder/.buildozer \
+            -v "$HOME/.gradle":/home/builder/.gradle \
+            --user "$(id -u):$(id -g)" \
+            asimoov-android "--${{ inputs.mode }}" --in-container
+
+      - name: Refuse an APK that carries a secret
+        run: |
+          apk=$(ls android/bin/*.apk | head -1)
+          if unzip -l "$apk" | grep -q 'secrets\.yaml'; then
+            echo "secrets.yaml is inside $apk" >&2
+            exit 1
+          fi
+          echo "no secrets.yaml in $apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: asimoov-${{ inputs.mode }}-apk
+          path: android/bin/*.apk
+          if-no-files-found: error
+          retention-days: 14
