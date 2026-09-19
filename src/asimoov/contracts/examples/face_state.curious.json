@@ -1,0 +1,10 @@
+{
+  "emotion": "curious",
+  "intensity": 0.8,
+  "gaze": { "x": -0.3, "y": 0.1 },
+  "lip": 0.42,
+  "blink": false,
+  "eyelids": 0.1,
+  "talking": true,
+  "ts": 1758290400.123
+}

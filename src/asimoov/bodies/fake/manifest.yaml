@@ -1,0 +1,11 @@
+apiVersion: asimoov/v1
+kind: Body
+name: fake
+kind_of_body: virtual
+capabilities: [gesture.wave, gesture.sit, gaze.pan_tilt, face.screen, audio.out, audio.in]
+implements:
+  wave_hello: {primitive: gesture, arg: wave, est_ms: 500}
+  sit:        {primitive: gesture, arg: sit, est_ms: 500}
+limits: {max_speed: 1.0, max_yaw_rate: 1.0, max_continuous_motion_s: 20}
+safety: {watchdog_ms: 500, stop_on_disconnect: true, forbidden: []}
+sensors: []

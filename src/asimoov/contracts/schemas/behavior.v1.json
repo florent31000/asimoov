@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asimoov.dev/schemas/behavior.v1.json",
+  "title": "Behavior v1",
+  "description": "Static behavior manifest. See contracts/behaviors.py: BehaviorManifest.",
+  "type": "object",
+  "required": [
+    "apiVersion", "kind", "name", "version", "description",
+    "duration_class"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": { "const": "asimoov/v1" },
+    "kind": { "const": "Behavior" },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "integer", "minimum": 1 },
+    "description": { "type": "string" },
+    "params": { "type": "object" },
+    "requires": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "duration_class": { "enum": ["instant", "short", "long"] },
+    "interruptible": { "type": "boolean" },
+    "fallback": { "type": ["string", "null"] },
+    "llm_visible": { "type": "boolean" }
+  }
+}

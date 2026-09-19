@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asimoov.dev/schemas/persona.v1.json",
+  "title": "Persona v1",
+  "description": "A robot's character. See contracts/persona.py: Persona.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "name", "language", "identity"],
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": { "const": "asimoov/v1" },
+    "kind": { "const": "Persona" },
+    "name": { "type": "string", "minLength": 1 },
+    "language": { "type": "string", "minLength": 2 },
+    "identity": { "type": "string", "minLength": 1 },
+    "traits": { "type": "array", "items": { "type": "string" } },
+    "speaking_style": { "type": "string" },
+    "relationships": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owners": { "type": "array", "items": { "type": "string" } },
+        "owners_style": { "type": "string" },
+        "strangers_style": { "type": "string" }
+      }
+    },
+    "emotions": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "neutral", "happy", "excited", "curious", "annoyed", "sad",
+          "angry", "love", "sleeping"
+        ]
+      }
+    },
+    "initiative": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": { "enum": ["low", "medium", "high"] },
+        "greet_on_arrival": { "type": "boolean" },
+        "cooldown_s": { "type": "integer", "minimum": 0 },
+        "quiet_hours": {
+          "type": ["array", "null"],
+          "items": { "type": "string" },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "rules": { "type": "array", "items": { "type": "string" } },
+    "voice": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "model": { "type": "string" },
+        "voice": { "type": "string" },
+        "transcription_language": { "type": "string" }
+      },
+      "required": ["provider", "model", "voice"]
+    },
+    "fragments": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asimoov"
+version = "0.1.0"
+description = "The open-source soul for companion robots"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [{ name = "Florent Bolzinger" }]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "websockets>=12.0",
+    "pyyaml>=6.0",
+    "numpy>=1.26",
+    "jsonschema>=4.20",
+    "certifi>=2024.2.2",
+]
+
+[project.urls]
+Homepage = "https://asimoov.com"
+Repository = "https://github.com/florent31000/asimoov"
+
+[project.optional-dependencies]
+go2 = [
+    "aiortc",
+    "aioice",
+    "av",
+    "pylibsrtp",
+    "cryptography",
+    "pyopenssl",
+    "ifaddr",
+    "dnspython",
+]
+inmoov = [
+    "pyserial>=3.5",
+]
+vision = [
+    "onnxruntime",
+    "opencv-python-headless",
+]
+vad = [
+    "onnxruntime",
+]
+kivy = [
+    "kivy>=2.3",
+    "pyjnius",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.6",
+    "jsonschema>=4.20",
+]
+
+[project.scripts]
+asimoov = "asimoov.__main__:main"
+
+[project.entry-points."asimoov.bodies"]
+fake = "asimoov.bodies.fake:FakeBody"
+
+[project.entry-points."asimoov.faces"]
+
+[project.entry-points."asimoov.voice_providers"]
+
+[project.entry-points."asimoov.perception"]
+
+[project.entry-points."asimoov.apps"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"asimoov.contracts" = ["schemas/*.json", "examples/*.json", "examples/*.yaml"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["asimoov"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asimoov.dev/schemas/envelope.v1.json",
+  "title": "Envelope v1",
+  "description": "One bus message, local or remote. See contracts/envelope.py.",
+  "type": "object",
+  "required": ["v", "kind", "topic", "id", "ts", "src", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "v": { "const": 1 },
+    "kind": {
+      "type": "string",
+      "enum": ["percept", "state", "cmd", "reply", "frame", "log", "metric"]
+    },
+    "topic": { "type": "string", "minLength": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "ts": { "type": "number" },
+    "src": { "type": "string", "minLength": 1 },
+    "corr": { "type": ["string", "null"] },
+    "data": { "type": "object" }
+  }
+}

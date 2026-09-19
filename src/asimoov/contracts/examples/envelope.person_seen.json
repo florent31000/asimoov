@@ -1,0 +1,20 @@
+{
+  "v": 1,
+  "kind": "percept",
+  "topic": "percept.person_seen",
+  "id": "01J9ZQ8K7VYUMR6VXW1WQXQXQX",
+  "ts": 1758290400.123,
+  "src": "perception.face_id",
+  "corr": null,
+  "data": {
+    "type": "person_seen",
+    "track_id": "t42",
+    "person_id": "p_sam",
+    "name": "Sam",
+    "confidence": 0.91,
+    "bearing": { "az": -12.5, "el": 3.0 },
+    "distance_class": "near",
+    "bbox_norm": [0.32, 0.18, 0.55, 0.62],
+    "face_quality": 0.78
+  }
+}

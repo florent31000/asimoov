@@ -1,0 +1,33 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# ASIMOOV runtime state, never committed
+.asimoov/
+secrets.yaml
+*.apk
+*.aab
+
+# models downloaded at first run
+*.onnx
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# site build
+site/dist/
+site/.astro/
+node_modules/

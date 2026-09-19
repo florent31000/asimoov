@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asimoov.dev/schemas/percept.v1.json",
+  "title": "Percept v1",
+  "description": "Closed vocabulary of percept payloads. See contracts/percepts.py.",
+  "oneOf": [
+    { "$ref": "#/$defs/person_seen" },
+    { "$ref": "#/$defs/person_lost" },
+    { "$ref": "#/$defs/speech_started" },
+    { "$ref": "#/$defs/speech_ended" },
+    { "$ref": "#/$defs/utterance" },
+    { "$ref": "#/$defs/touched" },
+    { "$ref": "#/$defs/battery" },
+    { "$ref": "#/$defs/body_state" },
+    { "$ref": "#/$defs/sound_event" },
+    { "$ref": "#/$defs/app_event" }
+  ],
+  "$defs": {
+    "bearing": {
+      "type": "object",
+      "required": ["az"],
+      "additionalProperties": false,
+      "properties": {
+        "az": { "type": "number" },
+        "el": { "type": "number" }
+      }
+    },
+    "person_seen": {
+      "type": "object",
+      "required": [
+        "type", "track_id", "confidence", "bearing", "distance_class",
+        "bbox_norm", "face_quality"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "person_seen" },
+        "track_id": { "type": "string" },
+        "person_id": { "type": ["string", "null"] },
+        "name": { "type": ["string", "null"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "bearing": { "$ref": "#/$defs/bearing" },
+        "distance_class": { "enum": ["near", "medium", "far"] },
+        "bbox_norm": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "face_quality": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "person_lost": {
+      "type": "object",
+      "required": ["type", "track_id", "last_bearing"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "person_lost" },
+        "track_id": { "type": "string" },
+        "person_id": { "type": ["string", "null"] },
+        "last_bearing": { "$ref": "#/$defs/bearing" }
+      }
+    },
+    "speech_started": {
+      "type": "object",
+      "required": ["type", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "speech_started" },
+        "source": { "type": "string" },
+        "direction": { "oneOf": [{ "$ref": "#/$defs/bearing" }, { "type": "null" }] }
+      }
+    },
+    "speech_ended": {
+      "type": "object",
+      "required": ["type", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "speech_ended" },
+        "source": { "type": "string" },
+        "direction": { "oneOf": [{ "$ref": "#/$defs/bearing" }, { "type": "null" }] }
+      }
+    },
+    "utterance": {
+      "type": "object",
+      "required": ["type", "text", "lang", "final"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "utterance" },
+        "text": { "type": "string" },
+        "lang": { "type": "string" },
+        "final": { "type": "boolean" },
+        "speaker_track_id": { "type": ["string", "null"] }
+      }
+    },
+    "touched": {
+      "type": "object",
+      "required": ["type", "where"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "touched" },
+        "where": { "enum": ["head", "back", "hand_l", "hand_r", "screen"] },
+        "intensity": { "type": "number", "minimum": 0 }
+      }
+    },
+    "battery": {
+      "type": "object",
+      "required": ["type", "level"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "battery" },
+        "level": { "type": "number", "minimum": 0, "maximum": 1 },
+        "charging": { "type": "boolean" }
+      }
+    },
+    "body_state": {
+      "type": "object",
+      "required": ["type", "posture"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "body_state" },
+        "posture": { "type": "string" },
+        "moving": { "type": "boolean" }
+      }
+    },
+    "sound_event": {
+      "type": "object",
+      "required": ["type", "label", "level"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "sound_event" },
+        "label": { "type": "string" },
+        "level": { "type": "number" }
+      }
+    },
+    "app_event": {
+      "type": "object",
+      "required": ["type", "name", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "app_event" },
+        "name": { "type": "string" },
+        "payload": { "type": "object" }
+      }
+    }
+  }
+}

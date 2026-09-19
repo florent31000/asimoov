@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asimoov.dev/schemas/body.v1.json",
+  "title": "Body v1",
+  "description": "Static body manifest. See contracts/body.py: BodyManifest.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "name", "kind_of_body"],
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": { "const": "asimoov/v1" },
+    "kind": { "const": "Body" },
+    "name": { "type": "string", "minLength": 1 },
+    "kind_of_body": {
+      "enum": ["quadruped", "humanoid_bust", "virtual", "wheeled", "other"]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "implements": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["primitive"],
+        "properties": {
+          "primitive": { "type": "string" },
+          "arg": { "type": "string" },
+          "est_ms": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "max_speed": { "type": "number" },
+        "max_yaw_rate": { "type": "number" },
+        "max_continuous_motion_s": { "type": "number" }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "properties": {
+        "watchdog_ms": { "type": "number" },
+        "stop_on_disconnect": { "type": "boolean" },
+        "forbidden": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "sensors": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

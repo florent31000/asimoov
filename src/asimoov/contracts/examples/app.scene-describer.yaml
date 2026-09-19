@@ -1,0 +1,17 @@
+apiVersion: asimoov/v1
+kind: App
+name: scene-describer
+version: 0.1.0
+description: "Describe what the camera sees (sends ONE image to a vision LLM on explicit request)."
+entrypoint: asimoov_app_scene_describer:App
+permissions: [camera.frames, llm.vision, memory.read]
+provides:
+  tools: [describe_scene]
+  behaviors: []
+  percepts: [x.scene_describer.described]
+  persona_fragment: "Tu peux décrire ce que tu vois si on te le demande explicitement."
+  triggers:
+    - { "on": utterance, match: "(qu'est-ce que tu vois|décris)", hint_tool: describe_scene }
+requires: { capabilities: [camera.front], python: ">=3.10" }
+degraded:
+  - { when_missing: camera.front, disable: [describe_scene], persona_fragment: "Tu n'as pas de caméra." }

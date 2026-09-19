@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asimoov.dev/schemas/face_state.v1.json",
+  "title": "FaceState v1",
+  "description": "What a face should show right now. See contracts/face.py: FaceState.",
+  "type": "object",
+  "required": ["emotion", "ts"],
+  "additionalProperties": false,
+  "properties": {
+    "emotion": {
+      "enum": [
+        "neutral", "happy", "excited", "curious", "annoyed", "sad",
+        "angry", "love", "sleeping"
+      ]
+    },
+    "intensity": { "type": "number", "minimum": 0, "maximum": 1 },
+    "gaze": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "minimum": -1, "maximum": 1 },
+        "y": { "type": "number", "minimum": -1, "maximum": 1 }
+      }
+    },
+    "lip": { "type": "number", "minimum": 0, "maximum": 1 },
+    "blink": { "type": "boolean" },
+    "eyelids": { "type": "number", "minimum": 0, "maximum": 1 },
+    "talking": { "type": "boolean" },
+    "ts": { "type": "number" }
+  }
+}
