@@ -308,7 +308,7 @@ class Hub:
         # report the hub's own shutdown as one.
         answered, raw = await run_with_timeout(client.connection.recv(), HELLO_TIMEOUT_S)
         if not answered:
-            raise TimeoutError(f"no hello within {HELLO_TIMEOUT_S}s")
+            raise asyncio.TimeoutError(f"no hello within {HELLO_TIMEOUT_S}s")
         try:
             hello = json.loads(raw if isinstance(raw, str) else raw.decode("utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError):

@@ -357,7 +357,7 @@ class TcpLink(Link):
             asyncio.open_connection(self._host, self._port), CONNECT_TIMEOUT_S
         )
         if not connected:
-            raise TimeoutError(f"no answer from {self._host}:{self._port}")
+            raise asyncio.TimeoutError(f"no answer from {self._host}:{self._port}")
         self._reader, self._writer = streams
         self._read_task = asyncio.create_task(self._read_loop(), name="inmoov-tcp-read")
 

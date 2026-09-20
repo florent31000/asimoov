@@ -122,7 +122,7 @@ class LocalBus:
         finally:
             self._waiters.pop(envelope.id, None)
         if not answered:
-            raise TimeoutError(f"no reply to {topic!r} within {timeout_s}s")
+            raise asyncio.TimeoutError(f"no reply to {topic!r} within {timeout_s}s")
         return reply
 
     def latest(self, topic: str) -> Envelope | None:

@@ -232,7 +232,7 @@ class SessionManager:
         await new.start(self._events, self._renewed_config(summary))
         try:
             await new.wait_ready(self._limits.switch_timeout_s)
-        except TimeoutError:
+        except (TimeoutError, asyncio.TimeoutError):
             await new.stop()
             raise
 

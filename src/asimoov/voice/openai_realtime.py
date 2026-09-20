@@ -310,7 +310,7 @@ class OpenAIRealtimeProvider(VoiceProvider):
         """
         ready, _ = await run_with_timeout(self._ready.wait(), timeout_s)
         if not ready:
-            raise TimeoutError(f"the realtime session was not ready within {timeout_s}s")
+            raise asyncio.TimeoutError(f"the realtime session was not ready within {timeout_s}s")
 
     async def send_tool_result(self, call_id: str, result: ToolResult) -> None:
         """Send the REAL tool result, then ``response.create`` only if idle.
@@ -371,7 +371,7 @@ class OpenAIRealtimeProvider(VoiceProvider):
             self._oob_response_id = None
             self._oob_tag = None
         if not answered:
-            raise TimeoutError(f"no summary within {timeout_s}s")
+            raise asyncio.TimeoutError(f"no summary within {timeout_s}s")
         return summary
 
     async def update_tools(self, tools: Sequence[ToolSpec]) -> None:

@@ -230,9 +230,9 @@ async def test_a_frame_is_relayed_once_and_never_to_its_sender(hub):
     try:
         await camera.send(frame)
         assert await asyncio.wait_for(viewer.recv(), timeout=2.0) == frame
-        with pytest.raises(TimeoutError):
+        with pytest.raises(asyncio.TimeoutError):
             await asyncio.wait_for(viewer.recv(), timeout=0.3)
-        with pytest.raises(TimeoutError):
+        with pytest.raises(asyncio.TimeoutError):
             await asyncio.wait_for(camera.recv(), timeout=0.3)
     finally:
         await camera.close()
@@ -269,7 +269,7 @@ async def test_two_clients_publishing_at_once_are_each_excluded_from_their_own()
         await right.send(json.dumps(_envelope_json("right")))
         assert json.loads(await asyncio.wait_for(left.recv(), timeout=2.0))["src"] == "right"
         assert json.loads(await asyncio.wait_for(right.recv(), timeout=2.0))["src"] == "left"
-        with pytest.raises(TimeoutError):
+        with pytest.raises(asyncio.TimeoutError):
             await asyncio.wait_for(left.recv(), timeout=0.3)
     finally:
         await right.close()

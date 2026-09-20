@@ -12,6 +12,7 @@ in-memory gallery, so "forget me" is true immediately.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -131,7 +132,7 @@ async def _request_perception(bus, topic: str, payload: dict[str, Any], timeout_
         return None
     try:
         reply = await bus.request(topic, payload, timeout_s=timeout_s)
-    except TimeoutError:
+    except (TimeoutError, asyncio.TimeoutError):
         log.warning("no perception module answered %s within %.0fs", topic, timeout_s)
         return None
     return reply.data

@@ -447,7 +447,7 @@ class ClaudePipelineProvider(VoiceProvider):
         """
         ready, _ = await run_with_timeout(self._ready.wait(), timeout_s)
         if not ready:
-            raise TimeoutError(f"the Claude pipeline was not ready within {timeout_s}s")
+            raise asyncio.TimeoutError(f"the Claude pipeline was not ready within {timeout_s}s")
 
     async def update_tools(self, tools: Sequence[ToolSpec]) -> None:
         """Republish the tool list. This invalidates the prompt cache prefix."""
@@ -474,7 +474,7 @@ class ClaudePipelineProvider(VoiceProvider):
                 self._collect(messages, self._system_blocks()), timeout_s
             )
         if not answered:
-            raise TimeoutError(f"no summary within {timeout_s}s")
+            raise asyncio.TimeoutError(f"no summary within {timeout_s}s")
         if message is None or getattr(message, "stop_reason", None) == "refusal":
             return ""
         return "".join(
