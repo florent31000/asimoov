@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-from helpers import FakeHub
+from helpers import FakeHub, deadline
 
 from asimoov.contracts.bus import Bus
 from asimoov.contracts.envelope import Envelope
@@ -122,7 +122,7 @@ async def test_subscribed_handlers_receive_matching_envelopes():
         await client.connect(2.0)
         await hub.push(Envelope(kind="cmd", topic="perception.face_id.enroll", src="core"))
         await hub.push(Envelope(kind="cmd", topic="body.cmd", src="core"))
-        async with asyncio.timeout(2.0):
+        async with deadline(2.0):
             while not seen:
                 await asyncio.sleep(0.01)
         await asyncio.sleep(0.05)
@@ -136,7 +136,7 @@ async def test_latest_keeps_the_last_state_per_topic():
         await client.connect(2.0)
         await hub.push(Envelope(kind="state", topic="scene.state", src="core", data={"n": 1}))
         await hub.push(Envelope(kind="state", topic="scene.state", src="core", data={"n": 2}))
-        async with asyncio.timeout(2.0):
+        async with deadline(2.0):
             while client.latest("scene.state") is None:
                 await asyncio.sleep(0.01)
             while client.latest("scene.state").data["n"] != 2:
@@ -201,7 +201,7 @@ async def test_binary_frames_go_to_the_frame_handler_not_to_subscriptions():
         client.subscribe_frames(on_frame)
         await client.connect(2.0)
         await hub.push_bytes(encode_frame("frame.browser", b"\xff\xd8\xff-jpeg"))
-        async with asyncio.timeout(2.0):
+        async with deadline(2.0):
             while not frames:
                 await asyncio.sleep(0.01)
         await client.close()
@@ -227,7 +227,7 @@ async def test_a_malformed_message_does_not_kill_the_connection():
         await client.connect(2.0)
         await hub.connections[-1].send("not json at all")
         await hub.push(Envelope(kind="percept", topic="percept.battery", src="body"))
-        async with asyncio.timeout(2.0):
+        async with deadline(2.0):
             while not seen:
                 await asyncio.sleep(0.01)
         await client.close()

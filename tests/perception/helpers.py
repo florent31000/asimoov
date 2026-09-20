@@ -18,6 +18,36 @@ from asimoov.contracts.envelope import Envelope
 from asimoov.perception.camera.base import CameraSource, Frame
 
 
+class deadline:
+    """Async context manager equivalent to ``asyncio.timeout`` on Python 3.10.
+
+    ``asyncio.timeout`` only exists from 3.11; the CI matrix runs 3.10 too.
+    """
+
+    def __init__(self, seconds: float) -> None:
+        self._seconds = seconds
+        self._expired = False
+        self._handle: asyncio.TimerHandle | None = None
+
+    def _expire(self, task: asyncio.Task[Any]) -> None:
+        self._expired = True
+        task.cancel()
+
+    async def __aenter__(self) -> deadline:
+        task = asyncio.current_task()
+        assert task is not None
+        loop = asyncio.get_running_loop()
+        self._handle = loop.call_later(self._seconds, self._expire, task)
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc: Any, tb: Any) -> bool:
+        if self._handle is not None:
+            self._handle.cancel()
+        if self._expired and exc_type is asyncio.CancelledError:
+            raise TimeoutError(f"deadline of {self._seconds}s expired") from None
+        return False
+
+
 def synthetic_image(width: int = 640, height: int = 360, *, seed: int = 0) -> np.ndarray:
     """A deterministic BGR image with a few drawn rectangles (never a face)."""
     rng = np.random.default_rng(seed)
@@ -214,11 +244,11 @@ class FakeHub:
         await self.connections[-1].send(payload)
 
     async def wait_for(self, count: int, timeout: float = 2.0) -> None:
-        async with asyncio.timeout(timeout):
+        async with deadline(timeout):
             while len(self.received) < count:
                 await asyncio.sleep(0.01)
 
     async def wait_for_patterns(self, patterns: tuple[str, ...], timeout: float = 2.0) -> None:
-        async with asyncio.timeout(timeout):
+        async with deadline(timeout):
             while self.patterns != patterns:
                 await asyncio.sleep(0.01)

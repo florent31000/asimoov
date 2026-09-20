@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-from helpers import synthetic_image
+from helpers import deadline, synthetic_image
 
 from asimoov.contracts.envelope import Envelope
 from asimoov.contracts.frames import encode_frame
@@ -71,7 +71,7 @@ async def test_a_percept_reaches_the_core_bus():
         running.bus.subscribe("percept.*", handler)
         client = await connected(running.url, module_id="perception.face_id")
         await client.publish("percept.person_seen", {"type": "person_seen", "track_id": "t1"})
-        async with asyncio.timeout(5.0):
+        async with deadline(5.0):
             while not seen:
                 await asyncio.sleep(0.01)
         await client.close()
