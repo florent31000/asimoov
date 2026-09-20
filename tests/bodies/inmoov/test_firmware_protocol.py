@@ -141,7 +141,7 @@ def test_jaw_needs_a_jaw_channel() -> None:
     firmware = FakeFirmware(channels=BUST_CHANNELS)
     firmware.handle_line("E all")
     assert firmware.handle_line("J 100") == ["OK"]
-    assert firmware.position(10) == 10  # interpolation just started
+    assert 10 <= firmware.position(10) < 11  # interpolation just started (real clock)
     firmware.handle_line("?")
 
 

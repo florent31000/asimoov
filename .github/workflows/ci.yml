@@ -41,6 +41,7 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install arduino:renesas_uno
           arduino-cli lib install "Adafruit PWM Servo Driver Library"
+          arduino-cli lib install Servo
 
       - name: Compile (bench config)
         run: |
