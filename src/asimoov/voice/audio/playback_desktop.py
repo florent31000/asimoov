@@ -16,7 +16,7 @@ from asimoov.voice.audio.tracker import StreamPlaybackTracker
 
 try:
     import sounddevice as sd
-except ImportError:  # pragma: no cover - depends on the host install
+except (ImportError, OSError):  # pragma: no cover - missing package or PortAudio library
     sd = None  # type: ignore[assignment]
 
 log = logging.getLogger(__name__)
