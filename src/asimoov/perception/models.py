@@ -2,7 +2,10 @@
 
 Models live in `$ASIMOOV_HOME/models/` (`~/.asimoov/models/` by default) and
 are never committed. `download_models` is the function
-`asimoov doctor --download-models` (WS1) calls.
+`asimoov doctor --download-models` (WS1) calls. The registry also carries
+Kokoro's two files (extra `[claude]`, WS2's `voice/claude_pipeline/tts.py`):
+they live under the same `models_dir()`, so one command fetches everything
+a robot needs on disk.
 """
 
 from __future__ import annotations
@@ -22,6 +25,9 @@ BUFFALO_SC_URL = "https://github.com/deepinsight/insightface/releases/download/v
 BUFFALO_SC_SHA256 = "57d31b56b6ffa911c8a73cfc1707c73cab76efe7f13b675a05223bf42de47c72"
 SILERO_VAD_URL = (
     "https://github.com/snakers4/silero-vad/raw/v5.1.2/src/silero_vad/data/silero_vad.onnx"
+)
+KOKORO_RELEASE_URL = (
+    "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1"
 )
 
 
@@ -58,8 +64,25 @@ SILERO_VAD = ModelSpec(
     url=SILERO_VAD_URL,
     optional=True,
 )
+#: Kokoro TTS (extra `[claude]`); filenames match
+#: `voice.claude_pipeline.tts.MODEL_FILENAME` / `VOICES_FILENAME`, which look
+#: for them at the same `models_dir()`.
+KOKORO_MODEL = ModelSpec(
+    name="kokoro_v1",
+    filename="kokoro-v1.0.onnx",
+    sha256="beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+    url=f"{KOKORO_RELEASE_URL}/kokoro-v1.0.onnx",
+    optional=True,
+)
+KOKORO_VOICES = ModelSpec(
+    name="kokoro_voices_v1",
+    filename="voices-v1.0.bin",
+    sha256="bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+    url=f"{KOKORO_RELEASE_URL}/voices-v1.0.bin",
+    optional=True,
+)
 
-MODELS: tuple[ModelSpec, ...] = (DETECTOR, EMBEDDER, SILERO_VAD)
+MODELS: tuple[ModelSpec, ...] = (DETECTOR, EMBEDDER, SILERO_VAD, KOKORO_MODEL, KOKORO_VOICES)
 
 #: Embedding model identity stored next to every vector in `face_embeddings`.
 EMBEDDING_MODEL_ID = "w600k_mbf"

@@ -17,5 +17,14 @@ initiative: { level: medium, greet_on_arrival: true, cooldown_s: 120, quiet_hour
 rules:
   - "Never perform a physical action without calling the matching tool."
   - "Never claim to have done something the tool result did not confirm."
-voice: { provider: openai_realtime, model: gpt-realtime-1.5, voice: alloy, transcription_language: en }
+voice:
+  provider: claude_pipeline
+  model: claude-opus-5
+  voice: af_heart
+  transcription_language: en
+  options:
+    effort: low
+    end_silence_ms: 700
+    stt: { engine: faster_whisper, model: small }
+    tts: { engine: kokoro }
 fragments: []

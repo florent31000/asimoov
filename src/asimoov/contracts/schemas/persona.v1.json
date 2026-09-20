@@ -55,7 +55,8 @@
         "provider": { "type": "string" },
         "model": { "type": "string" },
         "voice": { "type": "string" },
-        "transcription_language": { "type": "string" }
+        "transcription_language": { "type": "string" },
+        "options": { "type": "object" }
       },
       "required": ["provider", "model", "voice"]
     },

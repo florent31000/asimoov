@@ -50,26 +50,35 @@ manifest, and a conformance suite tells you when you are done. See
 ## Quick start
 
 You need Python 3.10 or newer, a microphone, and an API key from your voice
-provider.
+provider. Two are shipped: **Claude** (`claude_pipeline`, local VAD and STT,
+the Messages API, local TTS — what `robots/avatar` and `robots/inmoov` use)
+and **OpenAI Realtime** (`openai_realtime`, speech to speech — what
+`robots/go2` uses). Both are the same `VoiceProvider`; the persona's
+`voice.provider` picks one.
+
+```bash
+pip install 'asimoov[claude]'
+export ANTHROPIC_API_KEY=...
+asimoov run robots/avatar
+```
 
 ```bash
 pip install asimoov
 export OPENAI_API_KEY=...
-asimoov run robots/avatar
+asimoov run robots/go2
 ```
 
 Open `http://localhost:7331/face` and say hello. Tell it your name. Say
 goodbye. Come back tomorrow and see what happens.
 
 ```bash
-asimoov run robots/go2       # the quadruped
 asimoov run robots/inmoov    # the printed bust
 asimoov doctor               # check what your machine can do
 asimoov enroll --name Sam    # teach it a face from the command line
 ```
 
-Extras keep the core install small: `asimoov[go2]`, `asimoov[inmoov]`,
-`asimoov[vision]`, `asimoov[vad]`, `asimoov[kivy]`.
+Extras keep the core install small: `asimoov[claude]`, `asimoov[go2]`,
+`asimoov[inmoov]`, `asimoov[vision]`, `asimoov[vad]`, `asimoov[kivy]`.
 
 A personality is a file:
 

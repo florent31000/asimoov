@@ -140,20 +140,62 @@ def openai_api_key() -> str | None:
     return Secrets().get("openai_api_key")
 
 
-def _voice_factory(provider_cls: type) -> Callable[[], VoiceProvider]:
+def anthropic_api_key() -> str | None:
+    """The Anthropic key, same three sources, ``$ANTHROPIC_API_KEY`` last."""
+    return Secrets().get("anthropic_api_key")
+
+
+def _voice_factory(
+    provider_cls: type,
+    *,
+    on_usage: Callable[[dict[str, Any]], None] | None = None,
+    on_timestamp: Callable[[str, float], None] | None = None,
+) -> Callable[[], VoiceProvider]:
     """Build providers of ``provider_cls``, handing them the resolved key.
 
-    A provider whose constructor takes no ``api_key`` (the fake, a local
-    pipeline) is built untouched; the key is never a positional surprise.
+    Which key is read comes from the provider's own ``secret_key`` attribute,
+    so a Claude provider is never handed an OpenAI key. ``on_usage`` and
+    ``on_timestamp`` are only passed on when ``provider_cls`` actually
+    declares them (both real providers do; the fake does not), so this stays
+    safe against a constructor that takes neither.
     """
-    takes_key = "api_key" in inspect.signature(provider_cls).parameters
+    params = inspect.signature(provider_cls).parameters
+    takes_key = "api_key" in params
+    secret_key = getattr(provider_cls, "secret_key", "openai_api_key")
 
     def factory() -> VoiceProvider:
-        if not takes_key:
-            return provider_cls()
-        return provider_cls(api_key=openai_api_key())
+        kwargs: dict[str, Any] = {}
+        if takes_key:
+            kwargs["api_key"] = Secrets().get(secret_key)
+        if on_usage is not None and "on_usage" in params:
+            kwargs["on_usage"] = on_usage
+        if on_timestamp is not None and "on_timestamp" in params:
+            kwargs["on_timestamp"] = on_timestamp
+        return provider_cls(**kwargs)
 
     return factory
+
+
+class _PendingRuntimeHooks:
+    """Binds provider hooks to a `Runtime` that does not exist yet.
+
+    `Runtime.build` must hand the first `VoiceProvider` instance to the
+    `Runtime` dataclass as a constructor argument, so it is built before
+    `self` exists. This holds the runtime once `build` has it; neither hook
+    actually fires until well after `start()`, by which point `runtime` is
+    set.
+    """
+
+    def __init__(self) -> None:
+        self.runtime: Runtime | None = None
+
+    def note_usage(self, usage: dict[str, Any]) -> None:
+        if self.runtime is not None and self.runtime.sessions is not None:
+            self.runtime.sessions.note_usage(usage)
+
+    def on_timestamp(self, name: str, unix_s: float) -> None:
+        if self.runtime is not None:
+            self.runtime._on_playback_timestamp(name, unix_s)
 
 
 class _VoiceBridge(VoiceEvents):
@@ -351,16 +393,21 @@ class Runtime:
         body = body_cls()
         voice: VoiceProvider | None = None
         voice_factory: Callable[[], VoiceProvider] | None = None
+        hooks = _PendingRuntimeHooks()
         if voice_name != "none":
             provider_name = voice_name or (
                 config.persona.voice.provider if config.persona.voice else "fake"
             )
-            voice_factory = _voice_factory(load_plugin(VOICE_GROUP, provider_name))
+            voice_factory = _voice_factory(
+                load_plugin(VOICE_GROUP, provider_name),
+                on_usage=hooks.note_usage,
+                on_timestamp=hooks.on_timestamp,
+            )
             voice = voice_factory()
         names = config.faces if face_names is None else face_names
         faces = tuple(load_plugin(FACE_GROUP, name)() for name in names if name != "none")
         store = memory if memory is not None else SqliteMemoryStore(config.memory_file())
-        return cls(
+        runtime = cls(
             config=config,
             body=body,
             voice=voice,
@@ -372,6 +419,8 @@ class Runtime:
             hub_enabled=hub_enabled and config.hub.enabled,
             voice_factory=voice_factory,
         )
+        hooks.runtime = runtime
+        return runtime
 
     # -- lifecycle --------------------------------------------------------
 
@@ -667,7 +716,11 @@ class Runtime:
 
     def _voice_config(self) -> dict[str, Any]:
         voice = self.config.persona.voice
+        # persona `voice.options` (v1.4) first, so a provider-specific key
+        # (stt, tts, effort, end_silence_ms) reaches `start` -- and never
+        # overrides what the core itself owns below.
         return {
+            **(dict(voice.options) if voice else {}),
             "provider": voice.provider if voice else "fake",
             "model": voice.model if voice else "",
             "voice": voice.voice if voice else "",

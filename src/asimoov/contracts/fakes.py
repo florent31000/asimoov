@@ -338,6 +338,29 @@ class InMemoryMemoryStore(MemoryStore):
         self._persons[person.id] = person
         return person
 
+    async def touch_person(self, person_id: str, seen_at: float | None = None) -> None:
+        """Record that ``person_id`` was just seen (v1.4, matches `SqliteMemoryStore`)."""
+        person = self._persons.get(person_id)
+        if person is None:
+            return
+        self._persons[person_id] = Person(
+            id=person.id,
+            name=person.name,
+            created_at=person.created_at,
+            last_seen_at=seen_at if seen_at is not None else time.time(),
+            relationship=person.relationship,
+            notes=person.notes,
+        )
+
+    async def facts_for(self, person_id: str, limit: int = 10) -> list[str]:
+        """Most recent facts about ``person_id`` (v1.4, matches `SqliteMemoryStore`)."""
+        matching = sorted(
+            (fact for fact in self._facts if fact.person_id == person_id),
+            key=lambda fact: fact.ts,
+            reverse=True,
+        )
+        return [fact.text for fact in matching[:limit]]
+
     async def add_face_embedding(self, person_id: str, model: str, vec: Any, quality: float) -> None:
         return None
 

@@ -54,6 +54,13 @@ vision = [
 vad = [
     "onnxruntime",
 ]
+# The Claude pipeline: the Messages API plus the local audio ends it needs
+# (Kokoro is the only TTS here with a French voice -- see docs/voice.md).
+claude = [
+    "anthropic>=1.0",
+    "faster-whisper>=1.0",
+    "kokoro-onnx>=0.4",
+]
 kivy = [
     "kivy>=2.3",
     "pyjnius",
@@ -70,6 +77,7 @@ dev = [
     "ruff>=0.6",
     "jsonschema>=4.20",
     "sounddevice>=0.4.6",
+    "anthropic>=1.0",
 ]
 
 [project.scripts]
@@ -87,6 +95,7 @@ kivy = "asimoov.faces.kivy.renderer:KivyFace"
 
 [project.entry-points."asimoov.voice_providers"]
 openai_realtime = "asimoov.voice:OpenAIRealtimeProvider"
+claude_pipeline = "asimoov.voice.claude_pipeline:ClaudePipelineProvider"
 
 [project.entry-points."asimoov.perception"]
 face_id = "asimoov.perception.face_id:FaceIdModule"

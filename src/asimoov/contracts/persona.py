@@ -69,20 +69,37 @@ class Initiative:
 
 @dataclass(frozen=True)
 class VoiceConfig:
-    """Which voice provider/model/voice this persona speaks with."""
+    """Which voice provider/model/voice this persona speaks with.
+
+    ``options`` (v1.4) carries the settings only one provider understands --
+    a pipeline provider's STT and TTS engines, its effort level, its
+    end-of-turn silence -- without a new field per provider in this frozen
+    contract. It is passed through to `VoiceProvider.start`'s config and
+    never interpreted here.
+    """
 
     provider: str
     model: str
     voice: str
     transcription_language: str
+    options: dict[str, Any] = field(default_factory=dict)
+
+    def __hash__(self) -> int:
+        # A dict field would make the generated `__hash__` raise, and a v1.3
+        # `VoiceConfig` was hashable. Equality still compares `options`;
+        # hashing on the four strings only keeps equal objects hashing equal.
+        return hash((self.provider, self.model, self.voice, self.transcription_language))
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "provider": self.provider,
             "model": self.model,
             "voice": self.voice,
             "transcription_language": self.transcription_language,
         }
+        if self.options:
+            payload["options"] = dict(self.options)
+        return payload
 
 
 @dataclass(frozen=True)
@@ -160,6 +177,7 @@ class Persona:
                     model=voice_raw["model"],
                     voice=voice_raw["voice"],
                     transcription_language=voice_raw.get("transcription_language", payload.get("language", "en")),
+                    options=dict(voice_raw.get("options") or {}),
                 )
                 if voice_raw
                 else None

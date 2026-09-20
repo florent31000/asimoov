@@ -22,5 +22,6 @@ initiative: { level: medium, greet_on_arrival: true, cooldown_s: 120, quiet_hour
 rules:
   - "Ne fais jamais de saut ni de flip."
   - "N'exécute jamais une action physique sans appeler l'outil correspondant."
+# Kept on the Realtime API on purpose: avatar and inmoov show the Claude pipeline.
 voice: { provider: openai_realtime, model: gpt-realtime-1.5, voice: alloy, transcription_language: fr }
 fragments: []

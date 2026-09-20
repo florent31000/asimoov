@@ -166,6 +166,56 @@ async def test_the_fake_body_resolved_by_the_runtime_passes_conformance(avatar_c
     await run_conformance(runtime.body)
 
 
+@pytest.mark.parametrize("voice_name", ["claude_pipeline", "openai_realtime"])
+def test_build_wires_usage_and_timestamp_hooks_for_both_providers(avatar_config, voice_name):
+    """`_voice_factory` hands each real provider the runtime's hooks (review item).
+
+    `on_usage` must reach `SessionManager.note_usage` and `on_timestamp` must
+    join the telemetry `turn` span, for both providers -- not just the one
+    exercised by the integration tests. `Runtime.build` only constructs the
+    provider here; no socket is opened and no key is required.
+    """
+    runtime = Runtime.build(
+        avatar_config,
+        body_name="fake",
+        voice_name=voice_name,
+        face_names=(),
+        hub_enabled=False,
+    )
+
+    class RecordingSessions:
+        def __init__(self) -> None:
+            self.usages: list[dict] = []
+
+        def note_usage(self, usage: dict) -> None:
+            self.usages.append(usage)
+
+    runtime.sessions = RecordingSessions()
+    runtime.voice._on_usage({"total_tokens": 42})
+    assert runtime.sessions.usages == [{"total_tokens": 42}]
+
+    class RecordingTurn:
+        def __init__(self) -> None:
+            self.marks: list[str] = []
+
+        def mark(self, phase: str) -> None:
+            self.marks.append(phase)
+
+    runtime._turn = RecordingTurn()
+    runtime.voice._on_timestamp("speech_started_ts", 123.0)
+    assert runtime._turn.marks == ["speech_started"]
+
+
+def test_voice_factory_only_forwards_kwargs_the_constructor_declares():
+    """A provider with no `on_usage`/`on_timestamp` (the fake) still builds."""
+    from asimoov.core.runtime import _voice_factory
+
+    provider = _voice_factory(
+        FakeVoiceProvider, on_usage=lambda usage: None, on_timestamp=lambda name, ts: None
+    )()
+    assert isinstance(provider, FakeVoiceProvider)
+
+
 async def test_the_supervisor_restarts_a_crashing_component():
     supervisor = Supervisor()
     attempts: list[int] = []

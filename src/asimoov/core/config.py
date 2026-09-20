@@ -206,7 +206,10 @@ def load_robot_config(path: str | Path) -> RobotConfig:
 #: Vendor environment variables accepted as a last resort, after
 #: ``$ASIMOOV_<KEY>`` and the secrets file, so that `doctor`, `run` and the
 #: voice provider all read the same key (review, major 13).
-FALLBACK_ENV_VARS: dict[str, str] = {"openai_api_key": "OPENAI_API_KEY"}
+FALLBACK_ENV_VARS: dict[str, str] = {
+    "openai_api_key": "OPENAI_API_KEY",
+    "anthropic_api_key": "ANTHROPIC_API_KEY",
+}
 
 
 class Secrets:
@@ -214,7 +217,8 @@ class Secrets:
 
     Lookup order for ``openai_api_key``: ``$ASIMOOV_OPENAI_API_KEY``, then
     the ``openai_api_key`` key of the secrets file, then ``$OPENAI_API_KEY``
-    (`FALLBACK_ENV_VARS`). Values are never logged, never printed, and
+    (`FALLBACK_ENV_VARS`); ``anthropic_api_key`` follows the same order with
+    ``$ANTHROPIC_API_KEY`` last. Values are never logged, never printed, and
     never included in an error message.
     """
 

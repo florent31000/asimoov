@@ -345,6 +345,33 @@ def _audio_report() -> list[str]:
     ]
 
 
+def _claude_report() -> list[str]:
+    """One line per piece the Claude pipeline needs, and why it is missing."""
+    import shutil
+
+    from asimoov.voice.claude_pipeline.stt import FasterWhisperSTT
+    from asimoov.voice.claude_pipeline.tts import KOKORO_DEFAULTS, KokoroTTS
+
+    lines = []
+    try:
+        import anthropic
+
+        lines.append(f"anthropic sdk    {anthropic.__version__}")
+    except ImportError:
+        lines.append("anthropic sdk    missing (pip install asimoov[claude])")
+    lang, voice = KOKORO_DEFAULTS["en"]
+    engines = (("stt", FasterWhisperSTT()), ("tts", KokoroTTS(lang=lang, voice=voice)))
+    for label, engine in engines:
+        ok, reason = engine.available()
+        lines.append(f"claude {label}       " + ("available: " if ok else "NOT READY: ") + reason)
+    espeak = shutil.which("espeak-ng")
+    lines.append(
+        "espeak-ng        "
+        + (f"on PATH ({espeak})" if espeak else "NOT on PATH (kokoro-onnx needs it to phonemize)")
+    )
+    return lines
+
+
 def _audio_plan_report(config) -> tuple[list[str], bool]:
     """Whether this robot would actually open a microphone and a speaker.
 
@@ -384,11 +411,13 @@ def _doctor(args) -> int:
     lines.extend(_models_report())
     lines.extend(_audio_report())
 
+    lines.extend(_claude_report())
+
     secrets = Secrets()
-    lines.append(
-        "openai key       "
-        + ("set" if secrets.get("openai_api_key") else f"not set ({secrets.env_var('openai_api_key')})")
-    )
+    for key, label in (("openai_api_key", "openai key"), ("anthropic_api_key", "anthropic key")):
+        # Whether it is set, never the value.
+        state = "set" if secrets.get(key) else f"not set ({secrets.env_var(key)})"
+        lines.append(f"{label:<17}{state}")
 
     ready = True
     if args.robot_dir:

@@ -23,7 +23,7 @@ only; adding a dependency anywhere else is an issue, not a direct edit.
 ## Contracts are frozen
 
 `src/asimoov/contracts/**`, `src/asimoov/bodies/conformance.py`, and
-`src/asimoov/bodies/fake/**` are frozen at v1.3 (`CONTRACTS_FROZEN.md`).
+`src/asimoov/bodies/fake/**` are frozen at v1.4 (`CONTRACTS_FROZEN.md`).
 Changes are additive only (a new optional field, a new enum value) and go
 through WS0. Never modify an existing ABC signature, remove a vocabulary
 value, or add a dependency to `contracts/` (stdlib only, plus `pyyaml` in

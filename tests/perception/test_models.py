@@ -11,6 +11,8 @@ from asimoov.perception.models import (
     DETECTOR,
     EMBEDDER,
     EMBEDDING_DIM,
+    KOKORO_MODEL,
+    KOKORO_VOICES,
     MODELS,
     SILERO_VAD,
     face_models_available,
@@ -26,7 +28,7 @@ def test_every_model_declares_a_checksum_and_a_url():
     for spec in MODELS:
         assert len(spec.sha256) == 64
         assert spec.url.startswith("https://")
-        assert spec.filename.endswith(".onnx")
+        assert spec.filename.endswith((".onnx", ".bin"))
 
 
 def test_the_face_models_come_from_the_same_buffalo_pack():
@@ -36,8 +38,25 @@ def test_the_face_models_come_from_the_same_buffalo_pack():
     assert EMBEDDING_DIM == 512
 
 
-def test_only_the_vad_model_is_optional():
-    assert [spec.name for spec in MODELS if spec.optional] == [SILERO_VAD.name]
+def test_only_the_extras_are_optional():
+    assert {spec.name for spec in MODELS if spec.optional} == {
+        SILERO_VAD.name,
+        KOKORO_MODEL.name,
+        KOKORO_VOICES.name,
+    }
+
+
+def test_the_kokoro_files_match_where_kokoro_tts_looks_for_them():
+    """`KokoroTTS` reads `model_path`/`voices_path` from the same `models_dir()`
+    with these exact filenames (`voice/claude_pipeline/tts.py`); a rename on
+    either side would silently break `doctor --download-models`.
+    """
+    from asimoov.voice.claude_pipeline.tts import MODEL_FILENAME, VOICES_FILENAME
+
+    assert KOKORO_MODEL.filename == MODEL_FILENAME
+    assert KOKORO_VOICES.filename == VOICES_FILENAME
+    assert KOKORO_MODEL.archive_member is None
+    assert KOKORO_VOICES.archive_member is None
 
 
 def test_the_models_directory_follows_asimoov_home(monkeypatch, tmp_path):

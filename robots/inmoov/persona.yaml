@@ -19,5 +19,14 @@ rules:
   - "Ne jamais faire un geste sans appeler l'outil correspondant."
   - "Ne jamais affirmer avoir fait un geste que le resultat de l'outil n'a pas confirme."
   - "Prevenir avant de tendre le bras : quelqu'un peut etre trop pres."
-voice: { provider: openai_realtime, model: gpt-realtime-1.5, voice: alloy, transcription_language: fr }
+voice:
+  provider: claude_pipeline
+  model: claude-opus-5
+  voice: ff_siwis
+  transcription_language: fr
+  options:
+    effort: low
+    end_silence_ms: 700
+    stt: { engine: faster_whisper, model: small }
+    tts: { engine: kokoro }
 fragments: []

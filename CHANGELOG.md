@@ -7,6 +7,55 @@ follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- `asimoov doctor --download-models` also fetches Kokoro's
+  `kokoro-v1.0.onnx` and `voices-v1.0.bin` (checksummed, registered in
+  `perception/models.py`) into `$ASIMOOV_HOME/models/`, where `KokoroTTS`
+  already looked for them. `doctor` also reports whether `espeak-ng` is on
+  `PATH` (`kokoro-onnx` needs it to phonemize).
+- contracts v1.4 addition: `InMemoryMemoryStore.touch_person` and
+  `.facts_for`, matching `SqliteMemoryStore`. Additive, see
+  `CONTRACTS_FROZEN.md`.
+- **Claude voice provider** (`claude_pipeline`, extra `[claude]`). The Claude
+  Messages API carries text and images only, so this is a pipeline behind the
+  same frozen `VoiceProvider` ABC: local turn detection (Silero, energy
+  fallback), `faster-whisper` STT, `claude-opus-5` streaming text and
+  `tool_use`, Kokoro TTS at 24 kHz, sentence-chunked so speech starts before
+  the answer ends. Adaptive thinking, `effort: low`, a cached system prompt
+  with the latency instruction, `eager_input_streaming` on client tools with
+  the parsed input validated before dispatch, `stop_reason: "refusal"`
+  handled before the content, and `fallbacks: "default"` on by default.
+  `VoiceLoop`, `MicGate`, `BargeInController` and `SessionManager` run on it
+  unchanged. `robots/avatar` and `robots/inmoov` now speak through it;
+  `robots/go2` stays on the Realtime API as the other example.
+- contracts v1.4 -- 2026-09-20: `VoiceConfig.options`, the per-provider
+  settings a persona passes through to `VoiceProvider.start` (STT/TTS
+  engines, effort, end-of-turn silence). Additive and defaulted.
+- `anthropic_api_key` in `core.config.Secrets`
+  (`$ASIMOOV_ANTHROPIC_API_KEY`, `~/.asimoov/secrets.yaml`, then
+  `$ANTHROPIC_API_KEY`). `asimoov doctor` reports the SDK, the STT and TTS
+  engines, and whether each key is set -- never a value.
+- `tests/voice/claude_pipeline/` and
+  `tests/integration/test_runtime_claude.py`: a scripted Anthropic client,
+  no network and no key, proving the whole turn, the tool continuation, the
+  cancel, the buffered injection, the renewal summary and the refusal. Every
+  request and every history is checked against the Messages API placement
+  rules at teardown (`assert_valid_history`), so no test can go green on a
+  conversation the API would reject.
+
+### Fixed
+
+- `_voice_factory` built each provider with `on_usage`/`on_timestamp` left
+  unset, so `SessionManager.note_usage` was never called (renewal only
+  triggered on age) and the provider's own timestamps never joined the
+  telemetry `turn` span. `Runtime.build` now wires both, for either
+  provider, only forwarding a hook when the provider's constructor
+  actually declares it.
+- `InMemoryMemoryStore` had no `touch_person`/`facts_for`: a mind tick
+  raised `AttributeError` on any scene with a linked person when the fake
+  stood in for `SqliteMemoryStore` instead of a real bug in `core.mind`.
+- `Runtime._voice_factory` handed every provider the **OpenAI** key. It now
+  reads the key the provider class names in its `secret_key` attribute.
+
 - contracts v1.3 -- 2026-09-19: `TOPICS.BODY_MANIFEST` (`body.manifest`, a
   body republishing what it turned out to be); optional
   `VoiceEvents.on_response_started(response_id)`;

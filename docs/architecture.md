@@ -294,7 +294,7 @@ format.
 ## CLI
 
 ```
-asimoov run <robot_dir> [--voice fake|openai_realtime|none] [--body fake|...]
+asimoov run <robot_dir> [--voice fake|openai_realtime|claude_pipeline|none] [--body fake|...]
                         [--face web|none] [--replay FILE --speed N --max-gap S]
                         [--no-hub]
 asimoov replay <file> [--robot DIR] [--speed N] [--max-gap S] [--body ...] [--voice ...]
@@ -393,10 +393,11 @@ voice block (`provider`, `model`, `voice`, `transcription_language`) plus
 `instructions` (the system prompt) and `tools` (the `ToolSpec` **objects**
 to advertise — the provider owns the wire format and rejects anything
 else), and the provider calls back into the `VoiceEvents` it was
-given. The API key comes from `core.config.Secrets`
-(`$ASIMOOV_OPENAI_API_KEY`, `~/.asimoov/secrets.yaml`, then
-`$OPENAI_API_KEY`), the same place `asimoov doctor` reads. The runtime
-publishes
+given. The API key comes from `core.config.Secrets`, under the key the
+provider class names in its `secret_key` attribute
+(`$ASIMOOV_OPENAI_API_KEY` / `$ASIMOOV_ANTHROPIC_API_KEY`, then
+`~/.asimoov/secrets.yaml`, then the vendor's own variable), the same place
+`asimoov doctor` reads. The runtime publishes
 each event on the bus, which is what makes a session replayable:
 `on_speech_started` / `on_speech_ended` / `on_utterance` become
 `percept.*`; `on_tool_call` becomes a `voice.event` `tool_call`, answered
@@ -408,6 +409,18 @@ injector — the model starts most responses itself, so the core cannot only
 count the ones it asked for. `core/session.py` holds the renewal /
 truncation / idle thresholds, and `core/voice_loop.py` opens the devices
 and runs the microphone loop (see `docs/voice.md`).
+
+Two providers ship. `openai_realtime` is speech to speech over one
+websocket. `claude_pipeline` is the same ABC over the Claude Messages API,
+which carries text and images only: local VAD decides when a turn ends,
+local STT transcribes it, Claude streams text and `tool_use` blocks, and
+local TTS speaks the sentences as they arrive. Because the seam is the ABC
+and not the transport, the mind, the injector, the barge-in controller and
+the session manager cannot tell which one is running; what changes is where
+the conversation lives (a server-side session versus a message list the
+provider owns) and the latency budget (`docs/voice.md`). A persona picks one
+with `voice.provider`, and passes it provider-specific settings through
+`voice.options` (contracts v1.4).
 
 **Perception (WS3)** runs `python -m asimoov.perception` and talks to the
 hub with a `BusClient`, publishing `percept.*` envelopes and exchanging

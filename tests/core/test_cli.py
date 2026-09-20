@@ -30,6 +30,30 @@ def test_doctor_reports_perception_models_and_audio(capsys, asimoov_home):
     assert "barge-in         full-duplex" in out
 
 
+def test_doctor_reports_the_claude_pipeline_components(capsys, asimoov_home, monkeypatch):
+    """One line per piece, and the keys reported as set or not, never printed."""
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setenv("ASIMOOV_ANTHROPIC_API_KEY", "sk-ant-secret-value")
+    assert main(["doctor"]) == 0
+    out = capsys.readouterr().out
+    assert "claude_pipeline" in out
+    assert "anthropic sdk" in out
+    assert "claude stt" in out and "claude tts" in out
+    assert "anthropic key    set" in out
+    assert "sk-ant-secret-value" not in out
+
+
+def test_doctor_reports_whether_espeak_ng_is_on_path(capsys, asimoov_home, monkeypatch):
+    """`kokoro-onnx` phonemizes with `espeak-ng`; `doctor` says if it is missing."""
+    monkeypatch.setattr("shutil.which", lambda name: None)
+    assert main(["doctor"]) == 0
+    assert "espeak-ng        NOT on PATH" in capsys.readouterr().out
+
+    monkeypatch.setattr("shutil.which", lambda name: "/usr/bin/espeak-ng")
+    assert main(["doctor"]) == 0
+    assert "espeak-ng        on PATH (/usr/bin/espeak-ng)" in capsys.readouterr().out
+
+
 def test_doctor_downloads_the_models_on_demand(capsys, asimoov_home, monkeypatch):
     called: list[bool] = []
 

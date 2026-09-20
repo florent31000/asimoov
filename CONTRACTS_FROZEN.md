@@ -1,12 +1,37 @@
 # Contracts freeze
 
-**Version:** v1.3
-**Frozen:** 2026-09-19
+**Version:** v1.4
+**Frozen:** 2026-09-20
 **Owner:** WS0
 
 `src/asimoov/contracts/**` (vocabularies, ABCs, JSON Schemas, examples, and
-the shared fakes) is frozen at v1.3. Every other workstream builds against
+the shared fakes) is frozen at v1.4. Every other workstream builds against
 this surface without modifying it.
+
+## v1.4 additions (additive, backward-compatible)
+
+One field, with a default, so no v1.3 implementation breaks.
+
+- `contracts/persona.py` + `schemas/persona.v1.json`: `VoiceConfig.options`
+  (a mapping, default empty). A second voice provider arrived --
+  `claude_pipeline`, a STT -> LLM -> TTS pipeline -- and its persona needs
+  settings the Realtime provider has no use for: which STT and TTS engine,
+  the effort level, the end-of-turn silence. Adding a field per provider to
+  a frozen contract does not scale, so `options` carries them verbatim:
+  `Runtime._voice_config` spreads it under the keys the core owns
+  (`provider`, `model`, `voice`, `transcription_language`, `instructions`,
+  `tools`), and `contracts/` never interprets it. `to_dict` omits it when
+  empty, so a v1.3 persona round-trips byte for byte. A mapping field would
+  make the generated `__hash__` raise on a class that was hashable in v1.3,
+  so `VoiceConfig.__hash__` is written explicitly over the four strings;
+  `__eq__` still compares `options`.
+- `contracts/fakes.py`: `InMemoryMemoryStore.touch_person(person_id, seen_at)`
+  and `InMemoryMemoryStore.facts_for(person_id, limit)`, matching the two
+  concrete methods `core.mind.Mind` calls unconditionally on `self.memory`
+  (`_note_identity` and `refresh_memories`) that `SqliteMemoryStore` already
+  had and the fake did not: a mind tick against `InMemoryMemoryStore` raised
+  `AttributeError` as soon as a scene held a linked person. Both are new
+  methods on an already-concrete class, not ABC changes.
 
 ## v1.3 additions (additive, backward-compatible)
 
@@ -97,8 +122,8 @@ Everything below has a default, so no v1.1 implementation breaks.
 Changes to `contracts/` are **additive only**: a new field with a default,
 a new enum value, a new optional method with a default no-op is fine; a
 renamed field, a removed value, a signature change to an existing ABC
-method is not. Any such change is a new version (v1 -> v1.1 -> v1.2 -> v1.3) and
-goes through WS0, tagged `contracts-v1.3-frozen` and so on.
+method is not. Any such change is a new version (v1 -> v1.1 -> v1.2 -> v1.3
+-> v1.4) and goes through WS0, tagged `contracts-v1.4-frozen` and so on.
 
 ## What is frozen
 
@@ -120,7 +145,8 @@ goes through WS0, tagged `contracts-v1.3-frozen` and so on.
 - `contracts/perception.py` -- `PerceptionModule` ABC, `PerceptionContext`.
 - `contracts/memory.py` -- `Person`, `Fact`, `Episode`, `JournalEntry`, the
   `MemoryStore` ABC.
-- `contracts/persona.py` -- `Persona` and nested dataclasses, `load_persona`.
+- `contracts/persona.py` -- `Persona` and nested dataclasses (including
+  `VoiceConfig.options`), `load_persona`.
 - `contracts/app_manifest.py` -- `AppManifest` and nested dataclasses.
 - `contracts/tools.py` -- `ToolSpec`, `ToolResult`, `ToolHandler`.
 - `contracts/schemas/*.json` -- the 7 JSON Schemas (draft 2020-12).
